@@ -24,6 +24,7 @@ export interface WalkthroughControllerProps {
   onExit: () => void;
   onCollisionChange?: (wallId: string | null) => void;
   onActiveRoomChange?: (roomName: string, areaSqMeters?: number) => void;
+  onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
 }
 
 export function WalkthroughController({
@@ -36,6 +37,7 @@ export function WalkthroughController({
   onExit,
   onCollisionChange,
   onActiveRoomChange,
+  onPlayerPoseChange,
 }: WalkthroughControllerProps) {
   const { camera, gl } = useThree();
 
@@ -368,6 +370,12 @@ export function WalkthroughController({
       lastReportedRoom.current = roomLabel;
       onActiveRoomChange?.(roomLabel, foundRoom?.areaSqMeters);
     }
+
+    // Report player pose for 2D radar minimap HUD (Matching Reference Panel 3)
+    onPlayerPoseChange?.(
+      { x: playerPos.current.x, y: playerPos.current.y, z: playerPos.current.z },
+      yaw.current
+    );
   });
 
   return null;

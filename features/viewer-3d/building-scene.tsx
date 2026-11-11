@@ -50,6 +50,7 @@ export interface BuildingSceneProps {
   walkthroughFov?: number;
   onRegisterExporter?: (fn: () => Promise<void>) => void;
   isExplodedView?: boolean;
+  onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
 }
 
 export function BuildingScene({
@@ -81,6 +82,7 @@ export function BuildingScene({
   walkthroughFov = 76,
   onRegisterExporter,
   isExplodedView = false,
+  onPlayerPoseChange,
 }: BuildingSceneProps) {
   const controlsRef = React.useRef<OrbitControlsImpl>(null);
   const buildingGroupRef = React.useRef<THREE.Group>(null);
@@ -175,6 +177,7 @@ export function BuildingScene({
           touchPads={touchPads}
           fov={walkthroughFov}
           onActiveRoomChange={onActiveRoomChange}
+          onPlayerPoseChange={onPlayerPoseChange}
         />
       )}
 

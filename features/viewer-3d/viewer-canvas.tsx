@@ -49,6 +49,7 @@ import {
 } from '@/lib/reconstruction/interaction-types';
 import { BuildingScene } from './building-scene';
 import { TouchPadsState } from './walkthrough-controller';
+import { WalkthroughMinimap } from './walkthrough-minimap';
 
 export type Architectural3DViewMode = 'EXTERIOR' | 'DOLLHOUSE' | 'CUTAWAY' | 'INTERIOR' | 'BIM';
 export type UnitSystem = 'METRIC' | 'IMPERIAL';
@@ -208,9 +209,18 @@ export function ViewerCanvas({
   // Prototype Features: Quick-Jump Teleport Target
   const [quickJumpPoint, setQuickJumpPoint] = React.useState<Point3D | null>(walkthroughStartPoint);
 
+  // Real-time Player Pose for Walkthrough Minimap Radar (Matching Reference Panel 3)
+  const [playerPose, setPlayerPose] = React.useState<{ x: number; y: number; z: number; yaw: number }>({
+    x: walkthroughStartPoint?.x || 0,
+    y: 1.65,
+    z: walkthroughStartPoint?.z || 0,
+    yaw: 0,
+  });
+
   React.useEffect(() => {
     if (walkthroughStartPoint) {
       setQuickJumpPoint(walkthroughStartPoint);
+      setPlayerPose((p) => ({ ...p, x: walkthroughStartPoint.x, z: walkthroughStartPoint.z }));
     }
   }, [walkthroughStartPoint]);
 
@@ -334,6 +344,7 @@ export function ViewerCanvas({
             exporterRef.current = fn;
           }}
           isExplodedView={isExploded}
+          onPlayerPoseChange={(pos, yaw) => setPlayerPose({ ...pos, yaw })}
         />
       </Canvas>
 
@@ -711,6 +722,16 @@ export function ViewerCanvas({
                   })}
                 </div>
               )}
+            </div>
+
+            {/* Top-Right Floating Radar Minimap (Matching Reference Panel 3) */}
+            <div className="absolute top-28 right-4 pointer-events-auto z-20">
+              <WalkthroughMinimap
+                model={model}
+                activeFloorId={currentFloorId}
+                playerPose={playerPose}
+                fov={walkthroughFov}
+              />
             </div>
 
             {/* Active Collision Warning Indicator */}

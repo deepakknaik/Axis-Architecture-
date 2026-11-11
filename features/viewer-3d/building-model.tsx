@@ -14,6 +14,7 @@ import { DimensionOverlay3D } from './dimension-overlay-3d';
 import { RoofMesh } from './roof-mesh';
 import { RoomLabels3D } from './room-labels-3d';
 import { InteriorFixturesGroup } from './interior-fixtures-group';
+import { ExplodedGuideLines } from './exploded-guide-lines';
 
 export interface BuildingModelGroupProps {
   model: BuildingModel;
@@ -196,6 +197,11 @@ export function BuildingModelGroup({
           activeFloorId={activeFloorId}
           isExplodedView={isExplodedView}
         />
+      )}
+
+      {/* 12. Exploded Vertical Guide Alignment Cords (Matching Reference Panel 5) */}
+      {isExplodedView && activeFloorId === 'ALL' && (
+        <ExplodedGuideLines model={model} visible={isExplodedView} />
       )}
     </group>
   );
