@@ -124,6 +124,7 @@ export default function ProjectBlueprintPage({
             fileSize: selectedFile.size,
             status: 'READY',
             sourceChecksum: checksumSHA256,
+            sourceUrl: previewUrl,
             uploadedAt: new Date().toISOString(),
             width: dimensions?.width,
             height: dimensions?.height,
