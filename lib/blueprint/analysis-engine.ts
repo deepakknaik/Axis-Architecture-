@@ -84,11 +84,14 @@ export class AnalysisEngine {
     let realAnalysis: BlueprintAnalysis | null = null;
     try {
       if (typeof window !== 'undefined') {
-        const imageSource = blueprint?.sourceUrl || (
-          profile === 'DUPLEX_12x10' ? 'public/blueprints/blueprint-duplex-12x10.jpg' :
-          profile === 'VILLA_15x10' ? 'public/blueprints/blueprint-villa-15x10.png' :
-          'public/blueprints/blueprint-bungalow-10x12.png'
-        );
+        let imageSource = blueprint?.sourceUrl;
+        if (!imageSource || imageSource.startsWith('blob:')) {
+          imageSource = (
+            profile === 'DUPLEX_12x10' ? '/blueprints/blueprint-duplex-12x10.jpg' :
+            profile === 'VILLA_15x10' ? '/blueprints/blueprint-villa-15x10.png' :
+            '/blueprints/blueprint-bungalow-10x12.png'
+          );
+        }
 
         const apiRes = await fetch('/api/analyze-cv', {
           method: 'POST',

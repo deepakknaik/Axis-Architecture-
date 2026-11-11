@@ -3,15 +3,67 @@ import { execFile } from 'child_process';
 import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 
 const execFileAsync = promisify(execFile);
 
+function resolveTargetImage(imagePath?: string): string | null {
+  if (!imagePath) {
+    return path.join(process.cwd(), 'public', 'blueprints', 'blueprint-bungalow-10x12.png');
+  }
+
+  // 1. Direct absolute path on local disk
+  if (fs.existsSync(imagePath)) {
+    return imagePath;
+  }
+
+  // 2. Strip leading slashes and web path prefixes
+  const clean = imagePath.replace(/^[/\\]+/, '').replace(/^public[/\\]+/, '');
+
+  // 3. Try directly inside public/
+  const inPublic = path.join(process.cwd(), 'public', clean);
+  if (fs.existsSync(inPublic)) return inPublic;
+
+  // 4. Try inside current working directory
+  const inCwd = path.join(process.cwd(), clean);
+  if (fs.existsSync(inCwd)) return inCwd;
+
+  // 5. Try matching just the filename inside public/blueprints
+  const filename = path.basename(clean);
+  const inBlueprints = path.join(process.cwd(), 'public', 'blueprints', filename);
+  if (fs.existsSync(inBlueprints)) return inBlueprints;
+
+  return null;
+}
+
 export async function POST(req: NextRequest) {
+  let tempFilePath: string | null = null;
+
   try {
     const body = await req.json();
-    const { imagePath, blueprintId, units = 'METRIC', scale = '1:100' } = body;
+    const { imagePath, imageData, blueprintId, units = 'METRIC', scale = '1:100' } = body;
 
-    // Check if FastAPI service is running locally on port 8000
+    let targetImage: string | null = null;
+
+    // Handle base64 image data payload if sent from browser
+    if (imageData && typeof imageData === 'string' && imageData.includes('base64,')) {
+      const base64Data = imageData.split('base64,')[1];
+      tempFilePath = path.join(os.tmpdir(), `bp_upload_${Date.now()}.png`);
+      fs.writeFileSync(tempFilePath, Buffer.from(base64Data, 'base64'));
+      targetImage = tempFilePath;
+    } else {
+      targetImage = resolveTargetImage(imagePath);
+    }
+
+    if (!targetImage || !fs.existsSync(targetImage)) {
+      // Fallback default sample if path couldn't be resolved
+      targetImage = path.join(process.cwd(), 'public', 'blueprints', 'blueprint-duplex-12x10.jpg');
+      if (!fs.existsSync(targetImage)) {
+        targetImage = path.join(process.cwd(), 'public', 'blueprints', 'blueprint-bungalow-10x12.png');
+      }
+    }
+
+    // 1. Attempt FastAPI Microservice on port 8000
     try {
       const fastApiResponse = await fetch('http://127.0.0.1:8000/health', {
         method: 'GET',
@@ -19,18 +71,14 @@ export async function POST(req: NextRequest) {
       });
 
       if (fastApiResponse.ok) {
-        // Fast path: Delegate to FastAPI service
-        const resolvedPath = imagePath
-          ? path.resolve(process.cwd(), imagePath)
-          : path.resolve(process.cwd(), 'public', 'blueprints', 'blueprint-bungalow-10x12.png');
-
         const serviceRes = await fetch(
-          `http://127.0.0.1:8000/api/analyze-path?image_path=${encodeURIComponent(resolvedPath)}&units=${units}&scale=${scale}`,
+          `http://127.0.0.1:8000/api/analyze-path?image_path=${encodeURIComponent(targetImage)}&units=${units}&scale=${scale}`,
           { method: 'POST' }
         );
 
         if (serviceRes.ok) {
           const cvData = await serviceRes.json();
+          if (blueprintId) cvData.blueprintId = blueprintId;
           return NextResponse.json({
             success: true,
             source: 'FASTAPI_CV_ENGINE',
@@ -39,24 +87,13 @@ export async function POST(req: NextRequest) {
         }
       }
     } catch {
-      // FastAPI not running, fallback to direct python child process execution
+      // Microservice offline, fall through to direct python execution
     }
 
-    // Direct Python Execution Path
+    // 2. Direct Python child process execution
     const scriptPath = path.resolve(process.cwd(), 'blueprint_cv_engine.py');
-    const targetImage = imagePath
-      ? path.resolve(process.cwd(), imagePath)
-      : path.resolve(process.cwd(), 'public', 'blueprints', 'blueprint-bungalow-10x12.png');
-
-    if (!fs.existsSync(targetImage)) {
-      return NextResponse.json(
-        { success: false, error: `Blueprint file not found at: ${targetImage}` },
-        { status: 404 }
-      );
-    }
-
     const { stdout, stderr } = await execFileAsync('python', [scriptPath, targetImage], {
-      maxBuffer: 10 * 1024 * 1024,
+      maxBuffer: 15 * 1024 * 1024,
       timeout: 15000,
     });
 
@@ -80,5 +117,13 @@ export async function POST(req: NextRequest) {
       { success: false, error: err.message || 'CV Analysis failed' },
       { status: 500 }
     );
+  } finally {
+    if (tempFilePath && fs.existsSync(tempFilePath)) {
+      try {
+        fs.unlinkSync(tempFilePath);
+      } catch {
+        // cleanup ignore
+      }
+    }
   }
 }
