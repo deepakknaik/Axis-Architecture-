@@ -130,17 +130,20 @@ export function AnalysisWorkspaceView({
   }, [currentBlueprint, projectId, project?.blueprints, isCatalogProject, projectTitle, detectedProfile]);
 
   const previewUrl =
-    (activeBlueprint?.id ? clientBlueprintStorage.getPreviewUrl(activeBlueprint.id) : null) ||
     activeBlueprint?.sourceUrl ||
+    (activeBlueprint?.id ? clientBlueprintStorage.getPreviewUrl(activeBlueprint.id) : null) ||
     getBlueprintAssetUrl(detectedProfile);
 
   // Project-derived initial analysis (prevents cross-project flash)
   const initialAnalysis = React.useMemo(() => {
+    if (activeBlueprint?.analysis && activeBlueprint.analysis.walls?.length > 0) {
+      return activeBlueprint.analysis;
+    }
     const bpId = activeBlueprint?.id || `bp-${projectId}`;
     if (detectedProfile === 'DUPLEX_12x10') return buildDuplexAnalysis(bpId);
     if (detectedProfile === 'VILLA_15x10') return buildVillaAnalysis(bpId);
     return buildRealBlueprintAnalysis(bpId);
-  }, [activeBlueprint?.id, projectId, detectedProfile]);
+  }, [activeBlueprint, projectId, detectedProfile]);
 
   // Analysis Lifecycle State
   const [analysisStatus, setAnalysisStatus] = React.useState<AnalysisStatus>('PREPARING');

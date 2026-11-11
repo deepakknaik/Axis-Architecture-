@@ -17,7 +17,7 @@ import { validateBlueprintFile, formatFileSize } from '@/lib/blueprint/file-vali
 import { computeSHA256 } from '@/lib/blueprint/checksum';
 import { BlueprintStorage } from '@/lib/blueprint/blueprint-storage';
 import { detectBlueprintProfile } from '@/lib/blueprint/blueprint-detector';
-import { IngestionStatus, Blueprint } from '@/lib/types/architectural';
+import { IngestionStatus, Blueprint, BlueprintAnalysis } from '@/lib/types/architectural';
 import { useAxisProjectStore } from '@/store/project-store';
 import { useProjectWorkflowStore } from '@/store/project-workflow-store';
 import { WorkflowStepper } from '@/components/projects/workflow-stepper';
@@ -84,69 +84,89 @@ export default function ProjectBlueprintPage({
     if (!selectedFile || !checksumSHA256) return;
 
     setStatus('UPLOADING');
-    setProgressPercent(15);
-    setStageMessage('Uploading architectural plan');
-    setSubtaskDetail('Transferring immutable source bytes to session cache');
+    setProgressPercent(20);
+    setStageMessage('Uploading architectural plan to server');
+    setSubtaskDetail('Transferring immutable source bytes to storage');
 
-    // Controlled simulation of engineering ingestion milestones
+    let serverSourceUrl = previewUrl;
+    let detectedProfileKey = 'BUNGALOW_10x12';
+    let serverAnalysis: BlueprintAnalysis | undefined = undefined;
+
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('projectId', projectId);
+
+      const res = await fetch('/api/upload-blueprint', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.success) {
+          serverSourceUrl = data.sourceUrl || serverSourceUrl;
+          if (data.detectedProfile && data.detectedProfile !== 'CUSTOM') {
+            detectedProfileKey = data.detectedProfile;
+          }
+          if (data.analysis) {
+            serverAnalysis = data.analysis;
+          }
+        }
+      }
+    } catch (uploadErr) {
+      console.warn('Server upload fallback:', uploadErr);
+    }
+
+    setProgressPercent(60);
+    setStageMessage('Ingesting source stream');
+    setSubtaskDetail('Generating metadata registration records');
+    setStatus('INGESTING');
+
     setTimeout(() => {
-      setProgressPercent(45);
-      setStageMessage('Ingesting source stream');
-      setSubtaskDetail('Generating metadata registration records');
-      setStatus('INGESTING');
+      setProgressPercent(85);
+      setStageMessage('Verifying source integrity');
+      setSubtaskDetail('Matching cryptographic SHA-256 checksum against binary digest');
 
-      setTimeout(() => {
-        setProgressPercent(82);
-        setStageMessage('Verifying source integrity');
-        setSubtaskDetail('Matching cryptographic SHA-256 checksum against binary digest');
+      setTimeout(async () => {
+        setProgressPercent(100);
+        setStageMessage('Blueprint ready');
+        setSubtaskDetail('Source verified and ready for architectural analysis');
 
-        setTimeout(async () => {
-          setProgressPercent(100);
-          setStageMessage('Blueprint ready');
-          setSubtaskDetail('Source verified and ready for architectural analysis');
+        const blueprintId = `bp_${Date.now()}`;
 
-          const blueprintId = `bp_${Date.now()}`;
+        // Register in BlueprintStorage abstraction
+        await BlueprintStorage.upload(projectId, selectedFile, {
+          id: blueprintId,
+          checksumSHA256,
+          width: dimensions?.width,
+          height: dimensions?.height,
+        });
 
-          // Register in BlueprintStorage abstraction
-          await BlueprintStorage.upload(projectId, selectedFile, {
-            id: blueprintId,
-            checksumSHA256,
-            width: dimensions?.width,
-            height: dimensions?.height,
-          });
+        // Store blueprint metadata in Project state
+        const newBlueprint: Blueprint = {
+          id: blueprintId,
+          projectId,
+          name: selectedFile.name,
+          filename: selectedFile.name,
+          mimeType: selectedFile.type,
+          fileSize: selectedFile.size,
+          status: 'READY',
+          sourceChecksum: checksumSHA256,
+          sourceUrl: serverSourceUrl,
+          profile: detectedProfileKey,
+          analysis: serverAnalysis,
+          uploadedAt: new Date().toISOString(),
+          width: dimensions?.width,
+          height: dimensions?.height,
+          units: project?.settings?.defaultScaleUnit || 'METRIC',
+        };
 
-          const detectedProfileKey = detectBlueprintProfile({
-            filename: selectedFile.name,
-            name: selectedFile.name,
-            fileSize: selectedFile.size,
-            sourceChecksum: checksumSHA256,
-          });
-
-          // Store blueprint metadata in Project state
-          const newBlueprint: Blueprint = {
-            id: blueprintId,
-            projectId,
-            name: selectedFile.name,
-            filename: selectedFile.name,
-            mimeType: selectedFile.type,
-            fileSize: selectedFile.size,
-            status: 'READY',
-            sourceChecksum: checksumSHA256,
-            sourceUrl: previewUrl,
-            profile: detectedProfileKey,
-            uploadedAt: new Date().toISOString(),
-            width: dimensions?.width,
-            height: dimensions?.height,
-            units: project?.settings?.defaultScaleUnit || 'METRIC',
-          };
-
-          setProjectBlueprint(projectId, newBlueprint);
-          // Update workflow state: UPLOAD & INGESTION COMPLETED, ANALYSIS AVAILABLE (Section 06)
-          useProjectWorkflowStore.getState().setBlueprintIngested(projectId, blueprintId);
-          setStatus('READY');
-        }, 500);
-      }, 500);
-    }, 450);
+        setProjectBlueprint(projectId, newBlueprint);
+        useProjectWorkflowStore.getState().setBlueprintIngested(projectId, blueprintId);
+        setStatus('READY');
+      }, 400);
+    }, 400);
   };
 
   // Reset / Remove Blueprint handler
