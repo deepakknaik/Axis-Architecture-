@@ -10,6 +10,7 @@ export interface RoomLabels3DProps {
   visible?: boolean;
   selectedRoomId?: string | null;
   onSelectRoom?: (roomId: string) => void;
+  isExplodedView?: boolean;
 }
 
 export function RoomLabels3D({
@@ -18,18 +19,20 @@ export function RoomLabels3D({
   visible = true,
   selectedRoomId,
   onSelectRoom,
+  isExplodedView = false,
 }: RoomLabels3DProps) {
   if (!visible) return null;
 
   const activeRooms = React.useMemo(() => {
-    return floors.flatMap((floor) => {
+    return floors.flatMap((floor, floorIndex) => {
       if (activeFloorId !== 'ALL' && floor.id !== activeFloorId) return [];
+      const explodedY = isExplodedView && activeFloorId === 'ALL' ? floorIndex * 2.2 : 0;
       return (floor.rooms || []).map((r) => ({
         ...r,
-        elevation: floor.elevationMeters || 0,
+        elevation: (floor.elevationMeters || 0) + explodedY,
       }));
     });
-  }, [floors, activeFloorId]);
+  }, [floors, activeFloorId, isExplodedView]);
 
   return (
     <group>

@@ -8,15 +8,19 @@ export interface RoofMeshProps {
   model: BuildingModel;
   visible?: boolean;
   wireframe?: boolean;
+  activeFloorId?: string | 'ALL';
+  isExplodedView?: boolean;
 }
 
 export function RoofMesh({
   model,
   visible = true,
   wireframe = false,
+  activeFloorId = 'ALL',
+  isExplodedView = false,
 }: RoofMeshProps) {
   const roofGeometry = React.useMemo(() => {
-    const { boundingBox, dimensions } = model;
+    const { dimensions } = model;
     const overhang = 0.5; // 0.5m architectural eave overhang
     const roofWidth = dimensions.widthMeters + overhang * 2;
     const roofDepth = dimensions.depthMeters + overhang * 2;
@@ -46,7 +50,25 @@ export function RoofMesh({
 
   if (!visible) return null;
 
-  const baseElevation = model.boundingBox.max.y;
+  // In multi-floor models, if inspecting Ground Floor or any non-top floor, do not render exterior roof
+  const isSingleLowerFloor = Boolean(
+    activeFloorId &&
+    activeFloorId !== 'ALL' &&
+    model.floors.length > 1 &&
+    model.floors.findIndex((f) => f.id === activeFloorId) < model.floors.length - 1
+  );
+  if (isSingleLowerFloor) {
+    return null;
+  }
+
+  // Calculate highest top elevation across all floors to place roof on top floor
+  const topElevation = Math.max(
+    model.boundingBox.max.y,
+    ...model.floors.map((f) => (f.elevationMeters || 0) + (f.heightMeters || 3.0))
+  );
+
+  const explodedOffset = isExplodedView && activeFloorId === 'ALL' ? model.floors.length * 2.2 : 0;
+  const baseElevation = topElevation + explodedOffset;
   const centerX = (model.boundingBox.min.x + model.boundingBox.max.x) / 2;
   const centerZ = (model.boundingBox.min.z + model.boundingBox.max.z) / 2;
   const { dimensions } = model;

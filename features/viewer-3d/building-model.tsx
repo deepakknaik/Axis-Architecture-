@@ -25,6 +25,7 @@ export interface BuildingModelGroupProps {
   wireframe?: boolean;
   activeFloorId?: string | 'ALL';
   fadeNonSelectedFloors?: boolean;
+  isExplodedView?: boolean;
 }
 
 export function BuildingModelGroup({
@@ -37,6 +38,7 @@ export function BuildingModelGroup({
   wireframe = false,
   activeFloorId = 'ALL',
   fadeNonSelectedFloors = true,
+  isExplodedView = false,
 }: BuildingModelGroupProps) {
   return (
     <group
@@ -44,18 +46,21 @@ export function BuildingModelGroup({
         onSelectElement?.(null);
       }}
     >
-      {model.floors.map((floor) => {
+      {model.floors.map((floor, floorIndex) => {
         const isFloorActive = activeFloorId === 'ALL' || activeFloorId === floor.id;
 
-        // If not fading and floor is not active, skip rendering
-        if (!isFloorActive && !fadeNonSelectedFloors) {
+        // When accessing a specific floor (Ground only or First only), hide other floors
+        if (!isFloorActive) {
           return null;
         }
+
+        // Multi-floor exploded vertical separation (matching reference exploded model)
+        const explodedY = isExplodedView && activeFloorId === 'ALL' ? floorIndex * 2.2 : 0;
 
         return (
           <group
             key={floor.id}
-            position={[0, 0, 0]}
+            position={[0, explodedY, 0]}
           >
             {/* 1. Floor Slab */}
             {categoryVisibility.floors && floor.slab && (
@@ -166,6 +171,7 @@ export function BuildingModelGroup({
           floors={model.floors}
           activeFloorId={activeFloorId}
           visible={Boolean(categoryVisibility.fixtures ?? true)}
+          isExplodedView={isExplodedView}
         />
       )}
 
@@ -177,6 +183,7 @@ export function BuildingModelGroup({
           visible={Boolean(categoryVisibility.labels ?? true)}
           selectedRoomId={selectedElementId}
           onSelectRoom={onSelectElement}
+          isExplodedView={isExplodedView}
         />
       )}
 
@@ -186,6 +193,8 @@ export function BuildingModelGroup({
           model={model}
           visible={Boolean(categoryVisibility.roof)}
           wireframe={wireframe}
+          activeFloorId={activeFloorId}
+          isExplodedView={isExplodedView}
         />
       )}
     </group>

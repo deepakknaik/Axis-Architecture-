@@ -8,12 +8,14 @@ export interface InteriorFixturesGroupProps {
   floors: BuildingFloor[];
   activeFloorId?: string | 'ALL';
   visible?: boolean;
+  isExplodedView?: boolean;
 }
 
 export function InteriorFixturesGroup({
   floors,
   activeFloorId = 'ALL',
   visible = true,
+  isExplodedView = false,
 }: InteriorFixturesGroupProps) {
   if (!visible) return null;
 
@@ -24,9 +26,11 @@ export function InteriorFixturesGroup({
   return (
     <group>
       {relevantFloors.map((floor) => {
+        const floorIndex = floors.findIndex((f) => f.id === floor.id);
         const floorElev = floor.elevationMeters || 0;
+        const explodedY = isExplodedView && activeFloorId === 'ALL' ? Math.max(0, floorIndex) * 2.2 : 0;
         return (
-          <group key={`fixtures-${floor.id}`} position={[0, floorElev, 0]}>
+          <group key={`fixtures-${floor.id}`} position={[0, floorElev + explodedY, 0]}>
             {(floor.rooms || []).map((room) => {
               const name = (room.name || '').toLowerCase();
               const fn = room.roomFunction;

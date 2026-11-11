@@ -83,21 +83,39 @@ export function WallMesh({
       onPointerOut={() => onHover?.(null)}
     >
       {segmentsData.map((seg) => (
-        <mesh
-          key={seg.id}
-          position={seg.position}
-          rotation={[0, seg.rotationY, 0]}
-          castShadow
-          receiveShadow
-        >
-          <boxGeometry args={[seg.length, seg.height, seg.thickness]} />
-          <meshStandardMaterial
-            color={materialProps.color}
-            roughness={materialProps.roughness}
-            metalness={materialProps.metalness}
-            wireframe={wireframe}
-          />
-        </mesh>
+        <group key={seg.id}>
+          {/* Main Wall Segment */}
+          <mesh
+            position={seg.position}
+            rotation={[0, seg.rotationY, 0]}
+            castShadow
+            receiveShadow
+          >
+            <boxGeometry args={[seg.length, seg.height, seg.thickness]} />
+            <meshStandardMaterial
+              color={wireframe ? '#0284C7' : materialProps.color}
+              roughness={materialProps.roughness}
+              metalness={materialProps.metalness}
+              wireframe={wireframe}
+            />
+          </mesh>
+
+          {/* Architectural Wall Coping Cap (Top Rim - Dark Model Coping) */}
+          {!wireframe && !seg.isSill && (
+            <mesh
+              position={[seg.position[0], seg.position[1] + seg.height / 2 + 0.02, seg.position[2]]}
+              rotation={[0, seg.rotationY, 0]}
+              castShadow
+            >
+              <boxGeometry args={[seg.length + 0.02, 0.04, seg.thickness + 0.03]} />
+              <meshStandardMaterial
+                color={isSelected ? '#B85D36' : isHovered ? '#475569' : '#2D323A'}
+                roughness={0.5}
+                metalness={0.12}
+              />
+            </mesh>
+          )}
+        </group>
       ))}
     </group>
   );

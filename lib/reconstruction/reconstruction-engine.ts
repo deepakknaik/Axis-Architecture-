@@ -553,10 +553,15 @@ export class ReconstructionEngine {
     // Compute complete 3D model bounding box
     const allWorldPoints: Point3D[] = [];
     walls3D.forEach((w) => {
-      allWorldPoints.push(w.start, w.end, { ...w.start, y: w.heightMeters });
+      allWorldPoints.push(
+        w.start,
+        w.end,
+        { ...w.start, y: (w.elevationMeters || 0) + w.heightMeters },
+        { ...w.end, y: (w.elevationMeters || 0) + w.heightMeters }
+      );
     });
     columns3D.forEach((c) => {
-      allWorldPoints.push(c.position, { ...c.position, y: c.heightMeters });
+      allWorldPoints.push(c.position, { ...c.position, y: (c.position.y || 0) + c.heightMeters });
     });
     allWorldPoints.push(...slabPolygon);
 

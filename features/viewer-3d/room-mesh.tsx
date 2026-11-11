@@ -96,6 +96,8 @@ export function RoomMesh({
 
   if (!shape) return null;
 
+  const roomElev = room.boundaryPolygon?.[0]?.y || room.centroid?.y || 0;
+
   return (
     <group
       onClick={(e) => {
@@ -110,7 +112,7 @@ export function RoomMesh({
     >
       {/* Floor Polygon Fill (rotated -90deg X to lay flat) */}
       <mesh
-        position={[0, 0.015, 0]}
+        position={[0, roomElev + 0.015, 0]}
         rotation={[-Math.PI / 2, 0, 0]}
         receiveShadow
       >
@@ -137,7 +139,7 @@ export function RoomMesh({
       {/* Room Centroid Label Badge */}
       {(isSelected || isHovered) && (
         <Html
-          position={[room.centroid.x, 0.35, room.centroid.z]}
+          position={[room.centroid.x, roomElev + 0.35, room.centroid.z]}
           center
           distanceFactor={14}
           style={{ pointerEvents: 'none' }}

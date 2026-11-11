@@ -32,6 +32,11 @@ import {
   RotateCw,
   Download,
   Check,
+  Columns,
+  FileCode2,
+  Building2,
+  Layers2,
+  CheckCircle2,
 } from 'lucide-react';
 import { BuildingModel, Room3D, BuildingFloor, Point3D } from '@/lib/reconstruction/types';
 import {
@@ -45,6 +50,9 @@ import {
 import { BuildingScene } from './building-scene';
 import { TouchPadsState } from './walkthrough-controller';
 
+export type Architectural3DViewMode = 'EXTERIOR' | 'DOLLHOUSE' | 'CUTAWAY' | 'INTERIOR' | 'BIM';
+export type UnitSystem = 'METRIC' | 'IMPERIAL';
+
 export interface ViewerCanvasProps {
   model: BuildingModel;
   mode?: InteractionWorkspaceMode;
@@ -57,6 +65,7 @@ export interface ViewerCanvasProps {
   onHoverElement?: (id: string | null) => void;
   categoryVisibility?: CategoryVisibilityState;
   activeFloorId?: string | 'ALL';
+  onActiveFloorChange?: (floorId: string | 'ALL') => void;
   fadeNonSelectedFloors?: boolean;
   focusedRoom?: Room3D | null;
   focusedFloor?: BuildingFloor | null;
@@ -80,6 +89,7 @@ export function ViewerCanvas({
   onHoverElement,
   categoryVisibility = DEFAULT_CATEGORY_VISIBILITY,
   activeFloorId = 'ALL',
+  onActiveFloorChange,
   fadeNonSelectedFloors = true,
   focusedRoom = null,
   focusedFloor = null,
@@ -97,10 +107,67 @@ export function ViewerCanvas({
   const [activeCollisionWallId, setActiveCollisionWallId] = React.useState<string | null>(null);
   const shouldReduceMotion = useReducedMotion();
 
+  // Reference UI Features: View Mode, Units, Exploded Stack, Floor Isolation
+  const [viewMode, setViewMode] = React.useState<Architectural3DViewMode>('EXTERIOR');
+  const [unitSystem, setUnitSystem] = React.useState<UnitSystem>('METRIC');
+  const [isExploded, setIsExploded] = React.useState(false);
+  const [internalFloorId, setInternalFloorId] = React.useState<string | 'ALL'>(activeFloorId);
+
+  React.useEffect(() => {
+    setInternalFloorId(activeFloorId);
+  }, [activeFloorId]);
+
+  const currentFloorId = activeFloorId !== undefined ? activeFloorId : internalFloorId;
+
+  const handleFloorSelect = (fId: string | 'ALL') => {
+    setInternalFloorId(fId);
+    onActiveFloorChange?.(fId);
+  };
+
   // Prototype Features: Roof, Labels, Fixtures toggles
-  const [showRoof, setShowRoof] = React.useState(Boolean(categoryVisibility.roof));
+  const [showRoof, setShowRoof] = React.useState(true);
   const [showLabels, setShowLabels] = React.useState(categoryVisibility.labels !== false);
   const [showFixtures, setShowFixtures] = React.useState(categoryVisibility.fixtures !== false);
+
+  // Handle View Mode Selector (Matching Reference Design: Exterior, Dollhouse, Cutaway, Interior, BIM)
+  const handleViewModeChange = (targetMode: Architectural3DViewMode) => {
+    setViewMode(targetMode);
+    if (targetMode === 'EXTERIOR') {
+      setShowRoof(true);
+      setShowLabels(false);
+      setShowFixtures(true);
+      setWireframe(false);
+      setCameraPreset('PERSPECTIVE');
+      if (mode === 'WALKTHROUGH') onModeChange?.('INSPECT');
+    } else if (targetMode === 'DOLLHOUSE') {
+      setShowRoof(false);
+      setShowLabels(true);
+      setShowFixtures(true);
+      setWireframe(false);
+      setCameraPreset('AXONOMETRIC');
+      if (mode === 'WALKTHROUGH') onModeChange?.('INSPECT');
+    } else if (targetMode === 'CUTAWAY') {
+      setShowRoof(false);
+      setShowLabels(true);
+      setShowFixtures(true);
+      setWireframe(false);
+      setCameraPreset('FRONT');
+      if (mode === 'WALKTHROUGH') onModeChange?.('INSPECT');
+    } else if (targetMode === 'INTERIOR') {
+      setShowRoof(true);
+      setShowLabels(false);
+      setShowFixtures(true);
+      setWireframe(false);
+      onModeChange?.('WALKTHROUGH');
+    } else if (targetMode === 'BIM') {
+      setShowRoof(false);
+      setShowLabels(true);
+      setShowFixtures(false);
+      setWireframe(true);
+      setCameraPreset('AXONOMETRIC');
+      if (mode === 'WALKTHROUGH') onModeChange?.('INSPECT');
+    }
+  };
 
   // Prototype Features: Live Room Location Tracker
   const [activeRoomInfo, setActiveRoomInfo] = React.useState<{ name: string; area?: number }>({
@@ -147,6 +214,15 @@ export function ViewerCanvas({
     }
   }, [walkthroughStartPoint]);
 
+  // Synchronize mode switch from outside (e.g. from buttons elsewhere)
+  React.useEffect(() => {
+    if (mode === 'WALKTHROUGH' && viewMode !== 'INTERIOR') {
+      setViewMode('INTERIOR');
+    } else if (mode === 'INSPECT' && viewMode === 'INTERIOR') {
+      setViewMode('DOLLHOUSE');
+    }
+  }, [mode, viewMode]);
+
   // Merge local view toggles with category visibility
   const mergedCategoryVisibility: CategoryVisibilityState = React.useMemo(() => {
     return {
@@ -157,14 +233,21 @@ export function ViewerCanvas({
     };
   }, [categoryVisibility, showRoof, showLabels, showFixtures, mode]);
 
-  // Active rooms for the Quick-Jump toolbar
+  // Active rooms for the Quick-Jump toolbar & BIM table
   const availableRooms: Room3D[] = React.useMemo(() => {
-    if (activeFloorId === 'ALL') {
+    if (currentFloorId === 'ALL') {
       return model.floors.flatMap((f) => f.rooms || []);
     }
-    const currentFloor = model.floors.find((f) => f.id === activeFloorId);
+    const currentFloor = model.floors.find((f) => f.id === currentFloorId);
     return currentFloor?.rooms || [];
-  }, [model.floors, activeFloorId]);
+  }, [model.floors, currentFloorId]);
+
+  const totalBuiltUpAreaSqM = React.useMemo(() => {
+    return model.floors.reduce((acc, f) => {
+      const floorArea = (f.rooms || []).reduce((ra, r) => ra + (r.areaSqMeters || 0), 0);
+      return acc + (floorArea > 0 ? floorArea : (f.slab?.areaSqMeters || 0));
+    }, 0);
+  }, [model.floors]);
 
   const handleQuickJump = (room: Room3D) => {
     const fl = model.floors.find((f) => f.id === room.floorId) || model.floors[0];
@@ -192,6 +275,21 @@ export function ViewerCanvas({
     setMeasurements([]);
   };
 
+  // Metric vs Imperial format helpers
+  const formatLength = (meters: number) => {
+    if (unitSystem === 'IMPERIAL') {
+      return `${(meters * 3.28084).toFixed(1)} ft`;
+    }
+    return `${meters.toFixed(2)} m`;
+  };
+
+  const formatArea = (sqM: number) => {
+    if (unitSystem === 'IMPERIAL') {
+      return `${Math.round(sqM * 10.7639).toLocaleString()} sq.ft`;
+    }
+    return `${sqM.toFixed(1)} m²`;
+  };
+
   return (
     <div className={`relative w-full h-full bg-[#dde7ee] overflow-hidden select-none ${className}`}>
       {/* 3D WebGL Canvas */}
@@ -215,9 +313,9 @@ export function ViewerCanvas({
           onHoverElement={onHoverElement}
           categoryVisibility={mergedCategoryVisibility}
           showGrid={showGrid}
-          wireframe={wireframe}
+          wireframe={viewMode === 'BIM' ? true : wireframe}
           cameraPreset={cameraPreset}
-          activeFloorId={activeFloorId}
+          activeFloorId={currentFloorId}
           fadeNonSelectedFloors={fadeNonSelectedFloors}
           focusedRoom={focusedRoom}
           focusedFloor={focusedFloor}
@@ -235,10 +333,39 @@ export function ViewerCanvas({
           onRegisterExporter={(fn) => {
             exporterRef.current = fn;
           }}
+          isExplodedView={isExploded}
         />
       </Canvas>
 
-      {/* INSPECT MODE: Floating Architectural Toolbar */}
+      {/* TOP VIEW MODE SELECTOR (Exterior | Dollhouse | Cutaway | Interior | BIM) */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-auto flex items-center p-1 bg-stone-900/95 backdrop-blur-md border border-stone-700/80 rounded-xl shadow-2xl gap-1">
+        {[
+          { key: 'EXTERIOR', label: 'Exterior', icon: Home },
+          { key: 'DOLLHOUSE', label: 'Dollhouse', icon: Building2 },
+          { key: 'CUTAWAY', label: 'Cutaway', icon: Columns },
+          { key: 'INTERIOR', label: 'Interior', icon: Armchair },
+          { key: 'BIM', label: 'BIM', icon: FileCode2 },
+        ].map(({ key, label, icon: Icon }) => {
+          const isActive = viewMode === key;
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => handleViewModeChange(key as Architectural3DViewMode)}
+              className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-mono transition-all ${
+                isActive
+                  ? 'bg-axis-terracotta text-white shadow-lg font-bold'
+                  : 'text-stone-300 hover:text-white hover:bg-stone-800'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              <span>{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* INSPECT MODE: Floating Secondary Architectural Toolbars */}
       <AnimatePresence>
         {mode === 'INSPECT' && (
           <motion.div
@@ -247,7 +374,7 @@ export function ViewerCanvas({
             animate={{ opacity: 1, y: 0 }}
             exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: -6 }}
             transition={{ duration: shouldReduceMotion ? 0.05 : 0.2 }}
-            className="absolute top-4 left-4 right-4 flex items-center justify-between pointer-events-none gap-2 flex-wrap"
+            className="absolute top-16 left-4 right-4 flex items-center justify-between pointer-events-none gap-2 flex-wrap z-10"
           >
             {/* Tool Modes (Select, Orbit, Pan, Measure) */}
             <div className="pointer-events-auto flex items-center gap-1 p-1 bg-stone-900/90 backdrop-blur-md border border-stone-800 rounded-lg shadow-lg">
@@ -746,19 +873,215 @@ export function ViewerCanvas({
         )}
       </AnimatePresence>
 
-      {/* Bottom Datum Status Bar (Only in Inspect Mode) */}
+      {/* Reference UI: Cutaway Section Floor Height Callouts */}
+      {viewMode === 'CUTAWAY' && mode === 'INSPECT' && (
+        <div className="absolute right-4 top-28 pointer-events-none z-10">
+          <div className="bg-stone-900/90 backdrop-blur-md border border-stone-800 rounded-xl p-3 shadow-2xl space-y-2 text-xs font-mono text-stone-200 w-56">
+            <div className="text-[11px] font-bold text-axis-terracotta uppercase tracking-wider flex items-center gap-1.5">
+              <Columns className="w-3.5 h-3.5" />
+              <span>Section Heights</span>
+            </div>
+            <div className="space-y-1.5 pt-1">
+              <div className="p-1.5 rounded bg-stone-800/80 border border-stone-700/60 flex items-center justify-between">
+                <span className="text-stone-300">Roof Ridge</span>
+                <span className="text-white font-bold">+{formatLength(7.8)}</span>
+              </div>
+              <div className="p-1.5 rounded bg-stone-800/80 border border-stone-700/60 flex items-center justify-between">
+                <div>
+                  <div className="text-stone-200 font-semibold">First Floor</div>
+                  <div className="text-[10px] text-stone-400">Floor Height: {formatLength(3.0)}</div>
+                </div>
+                <span className="text-blue-300 font-bold">+{formatLength(3.0)}</span>
+              </div>
+              <div className="p-1.5 rounded bg-stone-800/80 border border-stone-700/60 flex items-center justify-between">
+                <div>
+                  <div className="text-stone-200 font-semibold">Ground Floor</div>
+                  <div className="text-[10px] text-stone-400">Floor Height: {formatLength(3.0)}</div>
+                </div>
+                <span className="text-emerald-300 font-bold">+{formatLength(0.0)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reference UI: Exploded Multi-Floor Stack Indicator Card */}
+      {isExploded && currentFloorId === 'ALL' && mode === 'INSPECT' && (
+        <div className="absolute right-4 top-28 pointer-events-none z-10 animate-in fade-in slide-in-from-right duration-200">
+          <div className="bg-stone-900/95 backdrop-blur-md border border-stone-700/80 rounded-xl p-3 shadow-2xl text-xs font-mono text-stone-200 w-60 space-y-2">
+            <div className="text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+              <Layers2 className="w-4 h-4" />
+              <span>Multi-Floor Output (Stack)</span>
+            </div>
+            <div className="space-y-1 pt-1 text-[11px]">
+              <div className="p-2 rounded bg-stone-800/90 border border-stone-700 flex items-center justify-between">
+                <span className="font-semibold text-stone-200">Roof / Terrace</span>
+                <span className="text-stone-400 text-[10px]">+{formatLength(6.0)}</span>
+              </div>
+              <div className="p-2 rounded bg-stone-800/90 border border-blue-500/40 flex items-center justify-between">
+                <span className="font-semibold text-blue-200">First Floor</span>
+                <span className="text-blue-400 text-[10px]">FFL +{formatLength(3.0)}</span>
+              </div>
+              <div className="p-2 rounded bg-stone-800/90 border border-emerald-500/40 flex items-center justify-between">
+                <span className="font-semibold text-emerald-200">Ground Floor</span>
+                <span className="text-emerald-400 text-[10px]">FFL +{formatLength(0.0)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reference UI: Technical / BIM View Schedule Card */}
+      {viewMode === 'BIM' && mode === 'INSPECT' && (
+        <div className="absolute right-4 bottom-16 pointer-events-auto z-10 max-w-sm w-full animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div className="bg-stone-900/95 backdrop-blur-md border border-blue-500/40 rounded-xl p-3.5 shadow-2xl text-xs font-mono text-stone-200 space-y-3">
+            <div className="flex items-center justify-between border-b border-stone-800 pb-2">
+              <div className="flex items-center gap-2 font-bold text-blue-400 uppercase tracking-wider text-[11px]">
+                <FileCode2 className="w-4 h-4" />
+                <span>Technical / BIM View</span>
+              </div>
+              <span className="px-1.5 py-0.5 rounded bg-blue-900/50 border border-blue-700 text-blue-300 text-[10px]">
+                LOD-300
+              </span>
+            </div>
+
+            {/* Room Schedule Table */}
+            <div className="max-h-44 overflow-y-auto pr-1">
+              <table className="w-full text-left text-[11px]">
+                <thead>
+                  <tr className="text-stone-400 border-b border-stone-800">
+                    <th className="py-1 font-semibold">Room</th>
+                    <th className="py-1 font-semibold text-right">Size ({unitSystem === 'IMPERIAL' ? 'ft' : 'm'})</th>
+                    <th className="py-1 font-semibold text-right">Area ({unitSystem === 'IMPERIAL' ? 'sq.ft' : 'm²'})</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-800/50">
+                  {availableRooms.map((rm) => {
+                    const widthM = rm.dimensions?.widthMeters ?? 3.5;
+                    const depthM = rm.dimensions?.depthMeters ?? 3.5;
+                    const sizeStr = `${formatLength(widthM)} × ${formatLength(depthM)}`;
+                    return (
+                      <tr key={rm.id} className="hover:bg-stone-800/40">
+                        <td className="py-1 text-stone-200 truncate max-w-[130px]">{rm.name}</td>
+                        <td className="py-1 text-stone-400 text-right whitespace-nowrap">{sizeStr}</td>
+                        <td className="py-1 text-blue-300 font-semibold text-right whitespace-nowrap">
+                          {formatArea(rm.areaSqMeters || 0)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Technical BIM Specification Badges */}
+            <div className="pt-2 border-t border-stone-800 space-y-1.5 text-[11px]">
+              <div className="flex items-center gap-1.5 text-stone-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Wall Thickness: <b>0.23 m (9&quot;)</b></span>
+              </div>
+              <div className="flex items-center gap-1.5 text-stone-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>No. of Floors: <b>{model.floors.length}</b></span>
+              </div>
+              <div className="flex items-center gap-1.5 text-stone-300">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <span>Total Built-up Area: <b className="text-axis-terracotta">{formatArea(totalBuiltUpAreaSqM)}</b></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bottom Floor Selector, Units & Exploded Controls (Matching Reference Design) */}
       {mode === 'INSPECT' && (
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 pointer-events-none">
-          <div className="px-2.5 py-1 rounded bg-stone-900/90 backdrop-blur-md border border-stone-800 text-[11px] font-mono text-stone-300 flex items-center gap-2 shadow-md">
+        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between pointer-events-none gap-2 flex-wrap z-10">
+          <div className="pointer-events-auto flex items-center gap-2 flex-wrap">
+            {/* 1. Floor Selector Bar (All Floors | Ground Floor | First Floor) */}
+            <div className="flex items-center gap-1 p-1 bg-stone-900/95 backdrop-blur-md border border-stone-800 rounded-xl shadow-xl text-xs font-mono">
+              <span className="text-stone-400 px-2 font-semibold">Floor:</span>
+              <button
+                type="button"
+                onClick={() => handleFloorSelect('ALL')}
+                className={`px-3 py-1 rounded-lg transition-colors ${
+                  currentFloorId === 'ALL'
+                    ? 'bg-axis-terracotta text-white font-bold shadow'
+                    : 'text-stone-300 hover:text-white hover:bg-stone-800'
+                }`}
+              >
+                All Floors
+              </button>
+              {model.floors.map((floor, idx) => {
+                const isActive = currentFloorId === floor.id;
+                const floorName =
+                  floor.name || (idx === 0 ? 'Ground Floor' : idx === 1 ? 'First Floor' : `Floor ${idx + 1}`);
+                return (
+                  <button
+                    key={floor.id}
+                    type="button"
+                    onClick={() => handleFloorSelect(floor.id)}
+                    className={`px-3 py-1 rounded-lg transition-colors ${
+                      isActive
+                        ? 'bg-axis-terracotta text-white font-bold shadow'
+                        : 'text-stone-300 hover:text-white hover:bg-stone-800'
+                    }`}
+                  >
+                    {floorName}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* 2. Exploded Stack Multi-Floor Separator Button */}
+            {model.floors.length > 1 && (
+              <button
+                type="button"
+                onClick={() => setIsExploded(!isExploded)}
+                title="Explode floor plates vertically to inspect each level simultaneously"
+                className={`pointer-events-auto flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-mono border shadow-xl transition-all ${
+                  isExploded
+                    ? 'bg-amber-600 border-amber-400 text-white font-bold shadow-amber-900/30'
+                    : 'bg-stone-900/95 border-stone-800 text-stone-300 hover:text-white hover:bg-stone-800'
+                }`}
+              >
+                <Layers2 className="w-3.5 h-3.5" />
+                <span>Exploded Stack</span>
+              </button>
+            )}
+
+            {/* 3. Metric (m) vs Imperial (ft) Unit Toggle */}
+            <div className="pointer-events-auto flex items-center p-1 bg-stone-900/95 backdrop-blur-md border border-stone-800 rounded-xl shadow-xl text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setUnitSystem('METRIC')}
+                className={`px-2.5 py-1 rounded-lg transition-colors ${
+                  unitSystem === 'METRIC'
+                    ? 'bg-stone-700 text-white font-bold shadow'
+                    : 'text-stone-400 hover:text-white'
+                }`}
+              >
+                Metric (m)
+              </button>
+              <button
+                type="button"
+                onClick={() => setUnitSystem('IMPERIAL')}
+                className={`px-2.5 py-1 rounded-lg transition-colors ${
+                  unitSystem === 'IMPERIAL'
+                    ? 'bg-stone-700 text-white font-bold shadow'
+                    : 'text-stone-400 hover:text-white'
+                }`}
+              >
+                Imperial (ft)
+              </button>
+            </div>
+          </div>
+
+          {/* Model Dimensions Datum Badge */}
+          <div className="pointer-events-auto px-3 py-1.5 rounded-xl bg-stone-900/90 backdrop-blur-md border border-stone-800 text-[11px] font-mono text-stone-300 flex items-center gap-2 shadow-lg">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-semibold text-white">
-              INSPECT MODE
-            </span>
-            <span className="text-stone-500">|</span>
-            <span className="text-stone-400">1 unit = 1.0 m</span>
-            <span className="text-stone-500">|</span>
+            <span className="text-stone-400">Total Bounding:</span>
             <span className="text-axis-terracotta font-medium">
-              {model.dimensions.widthMeters.toFixed(2)}m × {model.dimensions.depthMeters.toFixed(2)}m × {model.dimensions.heightMeters.toFixed(2)}m
+              {formatLength(model.dimensions.widthMeters)} × {formatLength(model.dimensions.depthMeters)} × {formatLength(model.dimensions.heightMeters)}
             </span>
           </div>
         </div>

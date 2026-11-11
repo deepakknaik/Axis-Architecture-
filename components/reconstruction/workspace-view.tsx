@@ -481,6 +481,7 @@ export function WorkspaceView({ projectId }: WorkspaceViewProps) {
               onHoverElement={setHoveredElementId}
               categoryVisibility={categoryVisibility}
               activeFloorId={activeFloorId}
+              onActiveFloorChange={setActiveFloorId}
               fadeNonSelectedFloors={fadeNonSelectedFloors}
               focusedRoom={focusedRoom}
               focusedFloor={focusedFloor}

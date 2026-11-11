@@ -49,6 +49,7 @@ export interface BuildingSceneProps {
   onActiveRoomChange?: (roomName: string, areaSqMeters?: number) => void;
   walkthroughFov?: number;
   onRegisterExporter?: (fn: () => Promise<void>) => void;
+  isExplodedView?: boolean;
 }
 
 export function BuildingScene({
@@ -79,6 +80,7 @@ export function BuildingScene({
   onActiveRoomChange,
   walkthroughFov = 76,
   onRegisterExporter,
+  isExplodedView = false,
 }: BuildingSceneProps) {
   const controlsRef = React.useRef<OrbitControlsImpl>(null);
   const buildingGroupRef = React.useRef<THREE.Group>(null);
@@ -225,6 +227,7 @@ export function BuildingScene({
           wireframe={wireframe}
           activeFloorId={activeFloorId}
           fadeNonSelectedFloors={fadeNonSelectedFloors}
+          isExplodedView={isExplodedView}
         />
       </group>
 
