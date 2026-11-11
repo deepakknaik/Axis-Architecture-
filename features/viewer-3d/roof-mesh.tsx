@@ -84,9 +84,9 @@ export function RoofMesh({
         receiveShadow
       >
         <meshStandardMaterial
-          color="#3A414B"
-          roughness={0.82}
-          metalness={0.12}
+          color="#282D36"
+          roughness={0.65}
+          metalness={0.18}
           side={THREE.DoubleSide}
           wireframe={wireframe}
         />
@@ -95,7 +95,7 @@ export function RoofMesh({
       {/* Fascia / Eave Trim Line */}
       <mesh position={[0, -ridgeHeight / 2 + 0.04, 0]}>
         <boxGeometry args={[dimensions.widthMeters + 1.05, 0.08, dimensions.depthMeters + 1.05]} />
-        <meshStandardMaterial color="#22272E" roughness={0.7} />
+        <meshStandardMaterial color="#17191E" roughness={0.4} metalness={0.35} />
       </mesh>
     </group>
   );

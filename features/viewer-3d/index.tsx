@@ -60,5 +60,6 @@ export { RoofMesh } from './roof-mesh';
 export { RoomLabels3D } from './room-labels-3d';
 export { InteriorFixturesGroup } from './interior-fixtures-group';
 export { SiteEnvironment } from './site-environment';
+export { ArchitecturalLighting } from './architectural-lighting';
 export { ExplodedGuideLines } from './exploded-guide-lines';
 export { WalkthroughMinimap } from './walkthrough-minimap';

@@ -83,12 +83,23 @@ export function DoorMesh({
         >
           <boxGeometry args={[width - frameThickness * 2, height - frameThickness, leafThickness]} />
           <meshStandardMaterial
-            color={materialColor}
-            roughness={0.65}
-            metalness={0.05}
+            color={isSelected ? '#D47343' : isHovered ? '#8D5B34' : '#6B4728'}
+            roughness={0.38}
+            metalness={0.04}
             wireframe={wireframe}
           />
         </mesh>
+
+        {/* Brushed Brass / Gold Vertical Architectural Pull Handle */}
+        {!wireframe && (
+          <mesh
+            position={[(width - frameThickness * 2) * 0.82, height * 0.48, leafThickness / 2 + 0.02]}
+            castShadow
+          >
+            <cylinderGeometry args={[0.012, 0.012, 0.65, 12]} />
+            <meshStandardMaterial color="#D4AF37" roughness={0.2} metalness={0.88} />
+          </mesh>
+        )}
       </group>
     </group>
   );

@@ -19,6 +19,7 @@ import { CameraController } from './camera-controller';
 import { WalkthroughController, TouchPadsState } from './walkthrough-controller';
 import { MeasurementOverlay } from './measurement-overlay';
 import { SiteEnvironment } from './site-environment';
+import { ArchitecturalLighting } from './architectural-lighting';
 import { exportBuildingModelToGLB } from './model-exporter';
 
 export interface BuildingSceneProps {
@@ -183,6 +184,9 @@ export function BuildingScene({
 
       {/* 2. Site Environment (Sky, Fog, Lawn, Concrete Plinth, Steps & Landscaping) */}
       <SiteEnvironment model={model} isWalkthrough={mode === 'WALKTHROUGH'} />
+
+      {/* 2b. Warm Architectural Soffit Spotlights & Landscape Lighting (Matching Reference Panel 1) */}
+      <ArchitecturalLighting model={model} isWalkthrough={mode === 'WALKTHROUGH'} />
 
       {/* 3. Natural Architectural Sun & Sky Lighting */}
       <ambientLight intensity={mode === 'WALKTHROUGH' ? 0.75 : 0.55} color="#FFFBF2" />

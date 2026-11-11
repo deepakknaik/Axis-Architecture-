@@ -62,13 +62,15 @@ export function WallMesh({
         metalness: 0.05,
       };
     }
-    // Standard warm architectural limestone
+    // Standard warm architectural limestone / crisp modern stucco
     return {
-      color: wall.classification === 'EXTERIOR' ? '#EAE6DC' : '#F1EEE8',
-      roughness: 0.85,
-      metalness: 0.02,
+      color: wall.classification === 'EXTERIOR' ? '#F6F4EE' : '#FAF8F4',
+      roughness: 0.82,
+      metalness: 0.03,
     };
   }, [isSelected, isHovered, wall.classification]);
+
+  const hasDoor = Boolean(wall.openings?.some((o) => o.type === 'DOOR'));
 
   return (
     <group
@@ -99,6 +101,26 @@ export function WallMesh({
               wireframe={wireframe}
             />
           </mesh>
+
+          {/* Entrance Feature: Warm Vertical Wood Slat Cladding Accent (Matching Reference Panel 1) */}
+          {!wireframe && hasDoor && wall.classification === 'EXTERIOR' && !seg.isHeader && !seg.isSill && (
+            <mesh
+              position={[
+                seg.position[0],
+                seg.position[1],
+                seg.position[2] + 0.012,
+              ]}
+              rotation={[0, seg.rotationY, 0]}
+              castShadow
+            >
+              <boxGeometry args={[seg.length, seg.height, 0.024]} />
+              <meshStandardMaterial
+                color="#85532F"
+                roughness={0.42}
+                metalness={0.06}
+              />
+            </mesh>
+          )}
 
           {/* Architectural Wall Coping Cap (Top Rim - Dark Model Coping) */}
           {!wireframe && !seg.isSill && (

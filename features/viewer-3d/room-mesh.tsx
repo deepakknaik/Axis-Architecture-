@@ -58,7 +58,7 @@ export function RoomMesh({
 
     // 1. Warm timber parquet for bedrooms
     if (fn === 'BEDROOM' || name.includes('bed')) {
-      return { color: '#B98B5C', roughness: 0.72, metalness: 0.02 };
+      return { color: '#C8A27A', roughness: 0.38, metalness: 0.04, clearcoat: 0.45, clearcoatRoughness: 0.2 };
     }
     // 2. Glazed ceramic tile for bathrooms
     if (
@@ -67,11 +67,11 @@ export function RoomMesh({
       name.includes('wc') ||
       name.includes('toilet')
     ) {
-      return { color: '#C2D2DA', roughness: 0.38, metalness: 0.08 };
+      return { color: '#CAD6DF', roughness: 0.18, metalness: 0.12, clearcoat: 0.85, clearcoatRoughness: 0.08 };
     }
     // 3. Honed quartz/terrazzo for kitchen
     if (fn === 'KITCHEN' || name.includes('kitchen')) {
-      return { color: '#CAC7BE', roughness: 0.55, metalness: 0.04 };
+      return { color: '#D9D5CC', roughness: 0.28, metalness: 0.06, clearcoat: 0.6, clearcoatRoughness: 0.15 };
     }
     // 4. Textured stone for porch / balcony / terrace
     if (
@@ -80,18 +80,18 @@ export function RoomMesh({
       name.includes('terrace') ||
       name.includes('balcony')
     ) {
-      return { color: '#B8B3A8', roughness: 0.8, metalness: 0.02 };
+      return { color: '#C4BEB2', roughness: 0.72, metalness: 0.02, clearcoat: 0.1, clearcoatRoughness: 0.5 };
     }
-    // 5. Architectural concrete/light wood for living / dining / hallway
-    if (fn === 'LIVING' || name.includes('living')) {
-      return { color: '#C8A882', roughness: 0.7, metalness: 0.02 };
+    // 5. Polished Italian marble for living / lounge / dining (Matching Reference Panel 2)
+    if (fn === 'LIVING' || name.includes('living') || name.includes('lounge')) {
+      return { color: '#F4EFE6', roughness: 0.16, metalness: 0.08, clearcoat: 0.82, clearcoatRoughness: 0.12 };
     }
     if (fn === 'DINING' || name.includes('dining')) {
-      return { color: '#D2CCC3', roughness: 0.65, metalness: 0.02 };
+      return { color: '#EFEAE0', roughness: 0.22, metalness: 0.06, clearcoat: 0.72, clearcoatRoughness: 0.14 };
     }
 
-    // Default architectural floor finish
-    return { color: '#DDD8CE', roughness: 0.75, metalness: 0.02 };
+    // Default polished architectural floor finish
+    return { color: '#EDE8DF', roughness: 0.24, metalness: 0.05, clearcoat: 0.65, clearcoatRoughness: 0.15 };
   }, [isSelected, isHovered, room.roomFunction, room.name]);
 
   if (!shape) return null;
@@ -117,10 +117,12 @@ export function RoomMesh({
         receiveShadow
       >
         <shapeGeometry args={[shape]} />
-        <meshStandardMaterial
+        <meshPhysicalMaterial
           color={materialProps.color}
           roughness={materialProps.roughness}
           metalness={materialProps.metalness}
+          clearcoat={materialProps.clearcoat ?? 0.5}
+          clearcoatRoughness={materialProps.clearcoatRoughness ?? 0.15}
           depthWrite={true}
         />
       </mesh>
