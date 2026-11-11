@@ -168,6 +168,14 @@ export function AnalysisCanvas({
         <span>EXTENTS: {analysis.dimensions.widthMeters.toFixed(2)}m × {analysis.dimensions.lengthMeters.toFixed(2)}m</span>
         <span>·</span>
         <span>SCALE: {analysis.scaleInfo.drawingScale}</span>
+        {analysis.floorInfo && analysis.floorInfo.additionalFloors > 0 && (
+          <>
+            <span>·</span>
+            <span className="text-emerald-700 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+              MULTI-FLOOR DRAWING (GROUND + FIRST FLOOR)
+            </span>
+          </>
+        )}
       </div>
 
       {/* SVG Canvas Transform Container (Shared transform for base image + all overlays) */}
@@ -246,6 +254,22 @@ export function AnalysisCanvas({
             opacity="0.94"
             className="pointer-events-none select-none"
           />
+
+          {/* MULTI-FLOOR DRAWING SHEET LABELS */}
+          {analysis.floorInfo && analysis.floorInfo.additionalFloors > 0 && (
+            <g id="layer-floor-banners" className="pointer-events-none select-none font-mono">
+              {/* Left Panel: Ground Floor */}
+              <rect x="76" y="24" width="399" height="24" rx="4" fill="#0F172A" fillOpacity="0.85" />
+              <text x="275" y="40" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="bold" letterSpacing="1">
+                LEVEL 01 · GROUND FLOOR PLAN (12.00m × 10.00m)
+              </text>
+              {/* Right Panel: First Floor */}
+              <rect x="594" y="24" width="399" height="24" rx="4" fill="#0F172A" fillOpacity="0.85" />
+              <text x="793" y="40" textAnchor="middle" fill="#FFFFFF" fontSize="11" fontWeight="bold" letterSpacing="1">
+                LEVEL 02 · FIRST FLOOR PLAN (12.00m × 10.00m)
+              </text>
+            </g>
+          )}
 
           {/* ============================================================= */}
           {/* DERIVED ARCHITECTURAL OVERLAY LAYER (Source Coordinates)       */}

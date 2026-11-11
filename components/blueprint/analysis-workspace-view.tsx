@@ -136,12 +136,12 @@ export function AnalysisWorkspaceView({
 
   // Project-derived initial analysis (prevents cross-project flash)
   const initialAnalysis = React.useMemo(() => {
-    if (activeBlueprint?.analysis && activeBlueprint.analysis.walls?.length > 0) {
-      return activeBlueprint.analysis;
-    }
     const bpId = activeBlueprint?.id || `bp-${projectId}`;
     if (detectedProfile === 'DUPLEX_12x10') return buildDuplexAnalysis(bpId);
     if (detectedProfile === 'VILLA_15x10') return buildVillaAnalysis(bpId);
+    if (activeBlueprint?.analysis && activeBlueprint.analysis.walls?.length > 0) {
+      return activeBlueprint.analysis;
+    }
     return buildRealBlueprintAnalysis(bpId);
   }, [activeBlueprint, projectId, detectedProfile]);
 

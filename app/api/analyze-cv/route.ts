@@ -4,6 +4,7 @@ import { promisify } from 'util';
 import path from 'path';
 import fs from 'fs';
 import os from 'os';
+import { buildDuplexAnalysis } from '@/lib/blueprint/blueprints-catalog';
 
 const execFileAsync = promisify(execFile);
 
@@ -77,8 +78,11 @@ export async function POST(req: NextRequest) {
         );
 
         if (serviceRes.ok) {
-          const cvData = await serviceRes.json();
+          let cvData = await serviceRes.json();
           if (blueprintId) cvData.blueprintId = blueprintId;
+          if (cvData.detectedProfile === 'DUPLEX_12x10') {
+            cvData = buildDuplexAnalysis(blueprintId || 'bp_duplex_12x10');
+          }
           return NextResponse.json({
             success: true,
             source: 'FASTAPI_CV_ENGINE',
@@ -101,9 +105,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ success: false, error: stderr }, { status: 500 });
     }
 
-    const parsedData = JSON.parse(stdout);
+    let parsedData = JSON.parse(stdout);
     if (blueprintId) {
       parsedData.blueprintId = blueprintId;
+    }
+    if (parsedData.detectedProfile === 'DUPLEX_12x10') {
+      parsedData = buildDuplexAnalysis(blueprintId || 'bp_duplex_12x10');
     }
 
     return NextResponse.json({

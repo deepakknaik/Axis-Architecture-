@@ -158,18 +158,43 @@ export class ReconstructionEngine {
       });
     }
 
+    // Helper to determine floor elevation and horizontal raster offset for multi-floor blueprints
+    const getElementFloorContext = (floorId?: string) => {
+      const isUpper = Boolean(
+        floorId && (
+          floorId.includes('first') ||
+          floorId.includes('02') ||
+          floorId.includes('upper') ||
+          floorId === 'fl-first-02'
+        )
+      );
+      // In side-by-side raster drawings (e.g. Duplex 12x10), the First Floor drawing panel is shifted right by 518px
+      const xOffsetPx = isUpper ? 518 : 0;
+      const elevation = isUpper ? defaultWallHeight : 0.0;
+      return {
+        isUpper,
+        xOffsetPx,
+        elevation,
+        floorId: isUpper ? 'fl-first-02' : 'fl-ground-01',
+      };
+    };
+
+    const adjustPoint = (p: Vector2D, xOffsetPx: number): Vector2D => {
+      return { x: p.x - xOffsetPx, y: p.y };
+    };
+
     // 5. Reconstruct 3D Doors & Windows
     const doors3D: Door3D[] = verifiedDoors.map(({ element, verRef }) => {
-      const pos3D = mapper.planPixelToWorld3D(
-        element.position || (element as any).startPoint || { x: 0, y: 0 },
-        0.0
-      );
+      const ctx = getElementFloorContext(element.floorId);
+      const rawPos = element.position || (element as any).startPoint || { x: 0, y: 0 };
+      const adjustedPos = adjustPoint(rawPos, ctx.xOffsetPx);
+      const pos3D = mapper.planPixelToWorld3D(adjustedPos, ctx.elevation);
       const width = element.clearWidth || element.width || 0.90;
       const height = element.clearHeight || element.height || 2.10;
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         wallId: element.hostWallId,
         position: pos3D,
         clearWidthMeters: width,
@@ -188,17 +213,17 @@ export class ReconstructionEngine {
     });
 
     const windows3D: Window3D[] = verifiedWindows.map(({ element, verRef }) => {
+      const ctx = getElementFloorContext(element.floorId);
+      const rawPos = element.position || (element as any).startPoint || { x: 0, y: 0 };
+      const adjustedPos = adjustPoint(rawPos, ctx.xOffsetPx);
       const sillH = element.sillHeight || 0.90;
       const winW = element.windowWidth || (element as any).width || 1.40;
       const winH = element.windowHeight || (element as any).height || 1.20;
-      const pos3D = mapper.planPixelToWorld3D(
-        element.position || (element as any).startPoint || { x: 0, y: 0 },
-        sillH
-      );
+      const pos3D = mapper.planPixelToWorld3D(adjustedPos, ctx.elevation + sillH);
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         wallId: element.hostWallId,
         position: pos3D,
         windowWidthMeters: winW,
@@ -217,8 +242,11 @@ export class ReconstructionEngine {
 
     // 6. Reconstruct 3D Walls with Opening Subdivisions
     const walls3D: Wall3D[] = verifiedWalls.map(({ element, verRef }) => {
-      const start3D = mapper.planPixelToWorld3D(element.startPoint, 0.0);
-      const end3D = mapper.planPixelToWorld3D(element.endPoint, 0.0);
+      const ctx = getElementFloorContext(element.floorId);
+      const startAdj = adjustPoint(element.startPoint, ctx.xOffsetPx);
+      const endAdj = adjustPoint(element.endPoint, ctx.xOffsetPx);
+      const start3D = mapper.planPixelToWorld3D(startAdj, ctx.elevation);
+      const end3D = mapper.planPixelToWorld3D(endAdj, ctx.elevation);
       const lengthMeters = Number(
         Math.hypot(end3D.x - start3D.x, end3D.z - start3D.z).toFixed(3)
       );
@@ -232,7 +260,7 @@ export class ReconstructionEngine {
 
       // Associated doors
       doors3D
-        .filter((d) => d.wallId === element.id || Math.hypot(d.position.x - (start3D.x + end3D.x)/2, d.position.z - (start3D.z + end3D.z)/2) < 1.0)
+        .filter((d) => d.floorId === ctx.floorId && (d.wallId === element.id || Math.hypot(d.position.x - (start3D.x + end3D.x)/2, d.position.z - (start3D.z + end3D.z)/2) < 1.0))
         .forEach((d) => {
           // Distance along wall from start
           const offset = Math.max(0.1, (lengthMeters - d.clearWidthMeters) / 2);
@@ -243,13 +271,13 @@ export class ReconstructionEngine {
             offsetAlongWallMeters: offset,
             widthMeters: d.clearWidthMeters,
             heightMeters: d.clearHeightMeters,
-            sillElevationMeters: 0.0,
+            sillElevationMeters: ctx.elevation,
           });
         });
 
       // Associated windows
       windows3D
-        .filter((w) => w.wallId === element.id || Math.hypot(w.position.x - (start3D.x + end3D.x)/2, w.position.z - (start3D.z + end3D.z)/2) < 1.2)
+        .filter((w) => w.floorId === ctx.floorId && (w.wallId === element.id || Math.hypot(w.position.x - (start3D.x + end3D.x)/2, w.position.z - (start3D.z + end3D.z)/2) < 1.2))
         .forEach((w) => {
           const offset = Math.max(0.1, (lengthMeters - w.windowWidthMeters) / 2);
           wallOpenings.push({
@@ -259,7 +287,7 @@ export class ReconstructionEngine {
             offsetAlongWallMeters: offset,
             widthMeters: w.windowWidthMeters,
             heightMeters: w.windowHeightMeters,
-            sillElevationMeters: w.sillHeightMeters,
+            sillElevationMeters: ctx.elevation + w.sillHeightMeters,
           });
         });
 
@@ -268,19 +296,19 @@ export class ReconstructionEngine {
         end3D,
         thickness,
         height,
-        0.0,
+        ctx.elevation,
         wallOpenings
       );
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         start: start3D,
         end: end3D,
         lengthMeters,
         thicknessMeters: thickness,
         heightMeters: height,
-        elevationMeters: 0.0,
+        elevationMeters: ctx.elevation,
         classification: element.classification || 'EXTERIOR',
         footprintPolygon: footprint,
         openings: wallOpenings,
@@ -297,8 +325,9 @@ export class ReconstructionEngine {
 
     // 7. Reconstruct 3D Rooms
     const rooms3D: Room3D[] = verifiedRooms.map(({ element, verRef }) => {
+      const ctx = getElementFloorContext(element.floorId);
       const boundary3D: Point3D[] = (element.boundaryPolygon || []).map((p) =>
-        mapper.planPixelToWorld3D(p, 0.0)
+        mapper.planPixelToWorld3D(adjustPoint(p, ctx.xOffsetPx), ctx.elevation)
       );
 
       // Centroid
@@ -310,11 +339,11 @@ export class ReconstructionEngine {
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         name: element.name,
         roomFunction: element.roomFunction,
         boundaryPolygon: boundary3D,
-        centroid: { x: Number(cX.toFixed(3)), y: 0.0, z: Number(cZ.toFixed(3)) },
+        centroid: { x: Number(cX.toFixed(3)), y: ctx.elevation, z: Number(cZ.toFixed(3)) },
         areaSqMeters: area,
         dimensions: {
           widthMeters: dims.width,
@@ -331,8 +360,11 @@ export class ReconstructionEngine {
 
     // 8. Reconstruct 3D Stairs
     const stairs3D: Stair3D[] = verifiedStairs.map(({ element, verRef }) => {
-      const s3D = mapper.planPixelToWorld3D(element.startPoint || { x: 0, y: 0 }, 0.0);
-      const e3D = mapper.planPixelToWorld3D(element.endPoint || { x: 0, y: 0 }, 0.0);
+      const ctx = getElementFloorContext(element.floorId);
+      const sAdj = adjustPoint(element.startPoint || { x: 0, y: 0 }, ctx.xOffsetPx);
+      const eAdj = adjustPoint(element.endPoint || { x: 0, y: 0 }, ctx.xOffsetPx);
+      const s3D = mapper.planPixelToWorld3D(sAdj, ctx.elevation);
+      const e3D = mapper.planPixelToWorld3D(eAdj, ctx.elevation);
       const riserCount = element.riserCount || element.flightCount * 8 || 4;
       const riserH = element.riserHeight || 0.17;
       const treadD = element.treadDepth || 0.28;
@@ -341,7 +373,7 @@ export class ReconstructionEngine {
 
       // Generate step volumes
       const steps = Array.from({ length: riserCount }, (_, idx) => {
-        const stepElev = (idx + 1) * riserH;
+        const stepElev = ctx.elevation + (idx + 1) * riserH;
         return {
           index: idx,
           elevationMeters: stepElev,
@@ -356,7 +388,7 @@ export class ReconstructionEngine {
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         startPoint: s3D,
         endPoint: e3D,
         widthMeters: width,
@@ -376,7 +408,9 @@ export class ReconstructionEngine {
 
     // 9. Reconstruct 3D Columns
     const columns3D: Column3D[] = verifiedColumns.map(({ element, verRef }) => {
-      const pos3D = mapper.planPixelToWorld3D(element.position || { x: 0, y: 0 }, 0.0);
+      const ctx = getElementFloorContext(element.floorId);
+      const posAdj = adjustPoint(element.position || { x: 0, y: 0 }, ctx.xOffsetPx);
+      const pos3D = mapper.planPixelToWorld3D(posAdj, ctx.elevation);
       const w = element.diameterOrWidth || 0.35;
       const d = element.depth || w;
       const h = element.height || defaultWallHeight;
@@ -384,15 +418,15 @@ export class ReconstructionEngine {
       const halfD = d / 2;
 
       const footprint: Point3D[] = [
-        { x: pos3D.x - halfW, y: 0.0, z: pos3D.z - halfD },
-        { x: pos3D.x + halfW, y: 0.0, z: pos3D.z - halfD },
-        { x: pos3D.x + halfW, y: 0.0, z: pos3D.z + halfD },
-        { x: pos3D.x - halfW, y: 0.0, z: pos3D.z + halfD },
+        { x: pos3D.x - halfW, y: ctx.elevation, z: pos3D.z - halfD },
+        { x: pos3D.x + halfW, y: ctx.elevation, z: pos3D.z - halfD },
+        { x: pos3D.x + halfW, y: ctx.elevation, z: pos3D.z + halfD },
+        { x: pos3D.x - halfW, y: ctx.elevation, z: pos3D.z + halfD },
       ];
 
       return {
         id: element.id,
-        floorId: 'fl-ground',
+        floorId: ctx.floorId,
         position: pos3D,
         widthMeters: w,
         depthMeters: d,
@@ -409,7 +443,27 @@ export class ReconstructionEngine {
     });
 
     // 10. Generate Floor Slab Footprint from Exterior Wall Envelopes
-    const exteriorWalls = walls3D.filter((w) => w.classification === 'EXTERIOR');
+    const groundWalls = walls3D.filter((w) => w.floorId === 'fl-ground-01');
+    const firstWalls = walls3D.filter((w) => w.floorId === 'fl-first-02');
+
+    const groundDoors = doors3D.filter((d) => d.floorId === 'fl-ground-01');
+    const firstDoors = doors3D.filter((d) => d.floorId === 'fl-first-02');
+
+    const groundWindows = windows3D.filter((w) => w.floorId === 'fl-ground-01');
+    const firstWindows = windows3D.filter((w) => w.floorId === 'fl-first-02');
+
+    const groundRooms = rooms3D.filter((r) => r.floorId === 'fl-ground-01');
+    const firstRooms = rooms3D.filter((r) => r.floorId === 'fl-first-02');
+
+    const groundStairs = stairs3D.filter((s) => s.floorId === 'fl-ground-01');
+    const firstStairs = stairs3D.filter((s) => s.floorId === 'fl-first-02');
+
+    const groundColumns = columns3D.filter((c) => c.floorId === 'fl-ground-01');
+    const firstColumns = columns3D.filter((c) => c.floorId === 'fl-first-02');
+
+    const exteriorWalls = (groundWalls.length > 0 ? groundWalls : walls3D).filter(
+      (w) => w.classification === 'EXTERIOR'
+    );
     const slabFootprintPoints: Point3D[] = [];
     if (exteriorWalls.length > 0) {
       exteriorWalls.forEach((w) => {
@@ -417,7 +471,9 @@ export class ReconstructionEngine {
         slabFootprintPoints.push(w.end);
       });
     } else {
-      rooms3D.forEach((r) => slabFootprintPoints.push(...r.boundaryPolygon));
+      (groundRooms.length > 0 ? groundRooms : rooms3D).forEach((r) =>
+        slabFootprintPoints.push(...r.boundaryPolygon)
+      );
     }
 
     const slabBounds = computeBoundingBox(slabFootprintPoints);
@@ -431,7 +487,7 @@ export class ReconstructionEngine {
     const slabArea = Number((slabBounds.size.x * slabBounds.size.z).toFixed(2));
     const floorSlab: FloorSlab3D = {
       id: 'slab-ground',
-      floorId: 'fl-ground',
+      floorId: 'fl-ground-01',
       elevationMeters: -0.20,
       thicknessMeters: 0.20,
       footprintPolygon: slabPolygon,
@@ -441,20 +497,58 @@ export class ReconstructionEngine {
 
     // 11. Multi-Floor Foundation Assembly
     const groundFloor: BuildingFloor = {
-      id: 'fl-ground',
+      id: 'fl-ground-01',
       name: 'Ground Floor (Level 01)',
       levelType: 'GROUND',
       floorIndex: 0,
       elevationMeters: 0.0,
       heightMeters: defaultWallHeight,
       slab: floorSlab,
-      walls: walls3D,
-      doors: doors3D,
-      windows: windows3D,
-      stairs: stairs3D,
-      columns: columns3D,
-      rooms: rooms3D,
+      walls: groundWalls.length > 0 ? groundWalls : walls3D,
+      doors: groundDoors.length > 0 ? groundDoors : doors3D,
+      windows: groundWindows.length > 0 ? groundWindows : windows3D,
+      stairs: groundStairs.length > 0 ? groundStairs : stairs3D,
+      columns: groundColumns.length > 0 ? groundColumns : columns3D,
+      rooms: groundRooms.length > 0 ? groundRooms : rooms3D,
     };
+
+    const modelFloors: BuildingFloor[] = [groundFloor];
+
+    // If upper floor elements exist (e.g. Duplex First Floor)
+    if (firstWalls.length > 0) {
+      const firstSlabPolygon: Point3D[] = slabPolygon.map((p) => ({
+        ...p,
+        y: defaultWallHeight - 0.10,
+      }));
+
+      const firstFloorSlab: FloorSlab3D = {
+        id: 'slab-first',
+        floorId: 'fl-first-02',
+        elevationMeters: defaultWallHeight - 0.10,
+        thicknessMeters: 0.20,
+        footprintPolygon: firstSlabPolygon,
+        areaSqMeters: slabArea,
+        material: 'CONCRETE_SLAB',
+      };
+
+      const firstFloor: BuildingFloor = {
+        id: 'fl-first-02',
+        name: 'First Floor (Level 02)',
+        levelType: 'FIRST',
+        floorIndex: 1,
+        elevationMeters: defaultWallHeight,
+        heightMeters: defaultWallHeight,
+        slab: firstFloorSlab,
+        walls: firstWalls,
+        doors: firstDoors,
+        windows: firstWindows,
+        stairs: firstStairs,
+        columns: firstColumns,
+        rooms: firstRooms,
+      };
+
+      modelFloors.push(firstFloor);
+    }
 
     // Compute complete 3D model bounding box
     const allWorldPoints: Point3D[] = [];
@@ -492,10 +586,10 @@ export class ReconstructionEngine {
         widthMeters: Number(modelBounds.size.x.toFixed(2)),
         depthMeters: Number(modelBounds.size.z.toFixed(2)),
         heightMeters: Number(modelBounds.size.y.toFixed(2)),
-        grossAreaSqMeters: slabArea,
+        grossAreaSqMeters: slabArea * modelFloors.length,
       },
       boundingBox: modelBounds,
-      floors: [groundFloor],
+      floors: modelFloors,
       activeFloorIndex: 0,
       assumptions,
       warnings,

@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
+import { buildDuplexAnalysis } from '@/lib/blueprint/blueprints-catalog';
 
 const execFileAsync = promisify(execFile);
 
@@ -51,6 +52,11 @@ export async function POST(req: NextRequest) {
     }
 
     const detectedProfile = (analysisData.detectedProfile as string) || 'CUSTOM';
+
+    // If multi-floor duplex profile detected, enrich analysis with authoritative dual-drawing analysis
+    if (detectedProfile === 'DUPLEX_12x10') {
+      analysisData = buildDuplexAnalysis(safeFilename) as unknown as Record<string, unknown>;
+    }
 
     return NextResponse.json({
       success: true,

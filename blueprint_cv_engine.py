@@ -510,7 +510,7 @@ def analyze_blueprint_image(image_path, target_units="METRIC", default_scale="1:
         },
         "floorInfo": {
             "groundFloors": 1,
-            "additionalFloors": 0,
+            "additionalFloors": 1 if visual_profile == "DUPLEX_12x10" else 0,
             "status": "RESOLVED"
         },
         "walls": extracted_walls,
