@@ -1,0 +1,256 @@
+Width: 13.33 in, Height: 7.00 in
+
+==================== SLIDE 1 ====================
+[0] Name: Picture 17 | Type: PICTURE (13) | Box: (-0.00, 0.00, 13.33, 7.00)
+    Text: <no text>
+[1] Name: Rectangle 45 | Type: AUTO_SHAPE (1) | Box: (3.37, 0.40, 6.67, 1.08)
+    Text: M S ENGINEERING COLLEGE
+BENGALURU
+[2] Name: Picture 10 | Type: PICTURE (13) | Box: (1.04, 0.25, 1.40, 1.31)
+    Text: <no text>
+[3] Name: Rounded Rectangle 48 | Type: AUTO_SHAPE (1) | Box: (1.07, 1.80, 11.19, 0.67)
+    Text: TITLE
+[4] Name: Rectangle 49 | Type: AUTO_SHAPE (1) | Box: (0.20, 4.76, 6.37, 1.72)
+    Text: By
+Student1 (USN:)
+Student1 (USN:)
+Student1 (USN:)
+Student1 (USN:)
+[5] Name: Rectangle 50 | Type: AUTO_SHAPE (1) | Box: (6.82, 4.76, 6.36, 1.67)
+    Text: Under the Guidance of 
+Guide Name
+Designation
+Dept .of AIML
+MSEC
+[6] Name: Rectangle 1 | Type: AUTO_SHAPE (1) | Box: (0.00, 3.13, 13.33, 1.50)
+    Text: Submitted to the 
+Visvesvaraya Technological University, Belagavi
+in partial fulfillment of the requirements for the award of the degree of
+Bachelor of Engineering in Artificial Intelligence and Machine Learning
+[7] Name: Rectangle 18 | Type: AUTO_SHAPE (1) | Box: (0.18, 3.04, 13.00, 0.00)
+[8] Name: Rectangle 19 | Type: AUTO_SHAPE (1) | Box: (0.18, 4.72, 13.00, 0.00)
+[9] Name: Rectangle 20 | Type: AUTO_SHAPE (1) | Box: (5.59, 5.81, 2.15, 0.00)
+[10] Name: Rectangle 44 | Type: AUTO_SHAPE (1) | Box: (0.17, 1.70, 13.00, 0.00)
+[11] Name: Picture 14 | Type: PICTURE (13) | Box: (10.97, 0.23, 1.33, 1.33)
+    Text: <no text>
+
+==================== SLIDE 2 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: Flow of Presentation
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Abstract
+Introduction
+Literature Review
+System Analysis
+System Design
+Implementation
+Testing
+Conclusion
+Screenshots
+Bibiliography
+
+==================== SLIDE 3 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: ABSTRACT
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the abstract here
+
+==================== SLIDE 4 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: INTRODUCTION
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the INTRODUCTION HERE
+
+==================== SLIDE 5 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: LITERATURE REVIEW
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the LITERATURE REVIEW HERE
+
+==================== SLIDE 6 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: SYSTEM ANALYSIS
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the PROBLEMS IN EXISTING SYSTEM
+ADD THE PROBLEM STATEMENT HERE
+
+==================== SLIDE 7 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: SYSTEM DESIGN
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the OBJECTIVES OF THE WORK
+ADD THE PROPOSED SYSTEM ARCHITECTURE
+
+==================== SLIDE 8 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: IMPLEMENTATION
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the MODULES OF THE WORK
+ADD SOME DATA FLOW DIAGRAMS
+
+==================== SLIDE 9 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: TESTING
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the TESTING IF DONE FOR THE MODULES
+
+==================== SLIDE 10 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: CONCLUSION
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the ADVATAGES OF PROPOSED SYSTEM AND CONCLUSION
+
+==================== SLIDE 11 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: 標題 1 | Type: PLACEHOLDER (14) | Box: (0.01, 0.08, 13.30, 0.78)
+    Text: SCREENSHOTS
+[3] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[4] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[5] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+[6] Name: Google Shape;207;p30 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.15, 12.86, 5.38)
+    Text: Add the FEW OUTPUT SCREENSHOTS
+
+==================== SLIDE 12 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.44)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[3] Name: Title 1 | Type: TEXT_BOX (17) | Box: (0.58, 0.19, 11.24, 0.57)
+    Text: Authors Publications
+[4] Name: Rectangle 2 | Type: AUTO_SHAPE (1) | Box: (0.00, -0.19, 0.20, 0.40)
+[5] Name: Rectangle 2 | Type: AUTO_SHAPE (1) | Box: (0.22, 1.33, 12.90, 0.46)
+    Text: Add the author publications if any
+[6] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[7] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+
+==================== SLIDE 13 ====================
+[0] Name: Picture 38 | Type: PICTURE (13) | Box: (0.00, 6.70, 13.33, 0.31)
+    Text: <no text>
+[1] Name: Picture 37 | Type: PICTURE (13) | Box: (0.00, 0.00, 13.33, 0.99)
+    Text: <no text>
+[2] Name: Rectangle 7 | Type: AUTO_SHAPE (1) | Box: (0.00, 6.75, 13.33, 0.27)
+    Text: Department of Artificial Intelligence and Machine Learning, M S Engineering College
+[3] Name: Title 1 | Type: TEXT_BOX (17) | Box: (1.05, 0.19, 11.24, 0.57)
+    Text: Reference
+[4] Name: Rectangle 2 | Type: AUTO_SHAPE (1) | Box: (0.00, -0.19, 0.20, 0.40)
+[5] Name: Rectangle 16 | Type: AUTO_SHAPE (1) | Box: (0.26, 1.05, 12.83, 0.36)
+    Text: Add the references here
+[6] Name: Picture 10 | Type: PICTURE (13) | Box: (0.19, 0.00, 0.89, 0.83)
+    Text: <no text>
+[7] Name: Picture 14 | Type: PICTURE (13) | Box: (12.51, 0.00, 0.83, 0.83)
+    Text: <no text>
+
+==================== SLIDE 14 ====================
+[0] Name: Oval 21 | Type: AUTO_SHAPE (1) | Box: (3.52, 0.29, 6.30, 6.30)
+    Text: Questions / Comments / Suggestions
+[1] Name: Rectangle 23 | Type: AUTO_SHAPE (1) | Box: (5.78, 0.15, 1.76, 2.62)
+    Text: ?
+
+==================== SLIDE 15 ====================
+[0] Name: Google Shape;171;p24 | Type: GROUP (6) | Box: (7.91, -0.24, 3.43, 4.76)
+    Text: <no text>
+[1] Name: Oval 21 | Type: AUTO_SHAPE (1) | Box: (0.80, 0.61, 4.70, 4.70)
+    Text: THANK YOU !
+[2] Name: Round Diagonal Corner Rectangle 11 | Type: AUTO_SHAPE (1) | Box: (6.12, 4.07, 6.49, 2.20)
+    Text: With Regards
+student names
