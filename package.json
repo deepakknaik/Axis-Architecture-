@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "platform": "python start_platform.py",
+    "cv:serve": "uvicorn cv_service:app --reload --port 8000",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
