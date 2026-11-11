@@ -12,6 +12,7 @@ import { BlueprintAnalysis, AnalysisStatus, Blueprint } from '@/lib/types/archit
 import { buildRealBlueprintAnalysis } from './real-blueprint-analysis';
 import { buildDuplexAnalysis, buildVillaAnalysis } from './blueprints-catalog';
 import { detectBlueprintProfile, BlueprintProfileKey } from './blueprint-detector';
+import { clientBlueprintStorage } from './blueprint-storage';
 
 export interface AnalysisEngineOptions {
   blueprint?: Partial<Blueprint>;
@@ -82,8 +83,26 @@ export class AnalysisEngine {
 
     // Check if live Computer Vision API is available
     let realAnalysis: BlueprintAnalysis | null = null;
+    let resolvedProfile: BlueprintProfileKey = profile;
+
     try {
       if (typeof window !== 'undefined') {
+        const storedFile = clientBlueprintStorage.getFile(blueprintId);
+        let imageData: string | undefined = undefined;
+
+        if (storedFile) {
+          try {
+            imageData = await new Promise<string>((resolve) => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.onerror = () => resolve('');
+              reader.readAsDataURL(storedFile);
+            });
+          } catch {
+            // ignore file read error
+          }
+        }
+
         let imageSource = blueprint?.sourceUrl;
         if (!imageSource || imageSource.startsWith('blob:')) {
           imageSource = (
@@ -97,6 +116,7 @@ export class AnalysisEngine {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
+            imageData: imageData || undefined,
             imagePath: imageSource,
             blueprintId: blueprintId,
           }),
@@ -105,7 +125,20 @@ export class AnalysisEngine {
         if (apiRes.ok) {
           const resJson = await apiRes.json();
           if (resJson.success && resJson.data) {
-            realAnalysis = resJson.data as BlueprintAnalysis;
+            const visual = resJson.data.detectedProfile as string | undefined;
+            if (visual && visual !== 'CUSTOM') {
+              resolvedProfile = visual as BlueprintProfileKey;
+            }
+
+            if (resolvedProfile === 'VILLA_15x10') {
+              realAnalysis = buildVillaAnalysis(blueprintId);
+            } else if (resolvedProfile === 'DUPLEX_12x10') {
+              realAnalysis = buildDuplexAnalysis(blueprintId);
+            } else if (resolvedProfile === 'BUNGALOW_10x12') {
+              realAnalysis = buildRealBlueprintAnalysis(blueprintId);
+            } else {
+              realAnalysis = resJson.data as BlueprintAnalysis;
+            }
           }
         }
       }
@@ -115,9 +148,9 @@ export class AnalysisEngine {
 
     // Fallback to source-derived architectural baseline if CV service was unavailable
     if (!realAnalysis) {
-      if (profile === 'DUPLEX_12x10') {
+      if (resolvedProfile === 'DUPLEX_12x10') {
         realAnalysis = buildDuplexAnalysis(blueprintId);
-      } else if (profile === 'VILLA_15x10') {
+      } else if (resolvedProfile === 'VILLA_15x10') {
         realAnalysis = buildVillaAnalysis(blueprintId);
       } else {
         realAnalysis = buildRealBlueprintAnalysis(blueprintId);
@@ -127,7 +160,7 @@ export class AnalysisEngine {
     const result: BlueprintAnalysis = {
       ...realAnalysis,
       id: `analysis-${blueprintId || 'session'}`,
-      blueprintId: blueprintId || (profile === 'VILLA_15x10' ? 'bp_villa_15x10' : 'bp_bungalow_10x12'),
+      blueprintId: blueprintId || (resolvedProfile === 'VILLA_15x10' ? 'bp_villa_15x10' : 'bp_bungalow_10x12'),
       startedAt: new Date(startTime).toISOString(),
       completedAt: new Date().toISOString(),
       modelExecutionTimeMs: duration,

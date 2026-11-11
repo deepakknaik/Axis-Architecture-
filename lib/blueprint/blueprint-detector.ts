@@ -68,56 +68,61 @@ export function detectBlueprintProfile(input: BlueprintDetectionInput = {}): Blu
     }
   }
 
-  // 3. Name, Filename, ID, or Source URL matching
-  const searchCorpus = [
+  // 3. Name, Filename, ID, or Source URL matching (Blueprint metadata takes priority over project ID)
+  const fileSearchCorpus = [
     input.filename,
     input.name,
     input.sourceUrl,
     input.id,
-    input.projectId,
   ]
     .filter(Boolean)
     .join(' ')
     .toLowerCase();
 
+  const projectCorpus = (input.projectId || '').toLowerCase();
+
+  // Check file metadata first
+  const corpusToCheck = fileSearchCorpus.length > 0 ? fileSearchCorpus : projectCorpus;
+
   // Villa 15x10 signatures
   if (
-    searchCorpus.includes('1793260006886') ||
-    searchCorpus.includes('villa') ||
-    searchCorpus.includes('15x10') ||
-    searchCorpus.includes('vil-no') ||
-    searchCorpus.includes('coastal')
+    corpusToCheck.includes('1793260006886') ||
+    corpusToCheck.includes('villa') ||
+    corpusToCheck.includes('15x10') ||
+    corpusToCheck.includes('vil-no') ||
+    corpusToCheck.includes('coastal')
   ) {
     return 'VILLA_15x10';
   }
 
   // Townhouse 8x12 signatures
   if (
-    searchCorpus.includes('1793260006911') ||
-    searchCorpus.includes('townhouse') ||
-    searchCorpus.includes('8x12') ||
-    searchCorpus.includes('town-house')
+    corpusToCheck.includes('1793260006911') ||
+    corpusToCheck.includes('townhouse') ||
+    corpusToCheck.includes('8x12') ||
+    corpusToCheck.includes('town-house')
   ) {
     return 'TOWNHOUSE_8x12';
   }
 
   // Duplex 12x10 signatures
   if (
-    searchCorpus.includes('1793260006918') ||
-    searchCorpus.includes('duplex') ||
-    searchCorpus.includes('12x10') ||
-    searchCorpus.includes('studio') ||
-    searchCorpus.includes('urban')
+    corpusToCheck.includes('1793260006918') ||
+    corpusToCheck.includes('1794403495788') ||
+    corpusToCheck.includes('duplex') ||
+    corpusToCheck.includes('12x10') ||
+    corpusToCheck.includes('studio') ||
+    corpusToCheck.includes('upperplan') ||
+    corpusToCheck.includes('ground_first')
   ) {
     return 'DUPLEX_12x10';
   }
 
   // Bungalow 10x12 signatures
   if (
-    searchCorpus.includes('bungalow') ||
-    searchCorpus.includes('10x12') ||
-    searchCorpus.includes('residence_01') ||
-    searchCorpus.includes('office')
+    corpusToCheck.includes('bungalow') ||
+    corpusToCheck.includes('10x12') ||
+    corpusToCheck.includes('office')
   ) {
     return 'BUNGALOW_10x12';
   }

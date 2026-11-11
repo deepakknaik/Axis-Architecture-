@@ -464,6 +464,7 @@ export interface Blueprint {
   height?: number;
   units?: string;
   sourcePath?: string;
+  profile?: string;
   analysis?: BlueprintAnalysis;
 }
 

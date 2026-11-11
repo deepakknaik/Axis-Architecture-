@@ -109,6 +109,10 @@ export function WorkspaceView({ projectId }: WorkspaceViewProps) {
     project?.blueprints?.[0];
 
   const detectedProfile = React.useMemo<BlueprintProfileKey>(() => {
+    if (candidateBlueprint?.profile && candidateBlueprint.profile !== 'BUNGALOW_10x12') {
+      return candidateBlueprint.profile as BlueprintProfileKey;
+    }
+
     return detectBlueprintProfile({
       id: candidateBlueprint?.id,
       filename: candidateBlueprint?.filename,
@@ -116,7 +120,7 @@ export function WorkspaceView({ projectId }: WorkspaceViewProps) {
       sourceUrl: candidateBlueprint?.sourceUrl,
       sourceChecksum: candidateBlueprint?.sourceChecksum,
       fileSize: candidateBlueprint?.fileSize,
-      projectId,
+      projectId: candidateBlueprint ? undefined : projectId,
     });
   }, [candidateBlueprint, projectId]);
 

@@ -16,6 +16,7 @@ import { BlueprintReadyState } from '@/components/blueprint/blueprint-ready-stat
 import { validateBlueprintFile, formatFileSize } from '@/lib/blueprint/file-validation';
 import { computeSHA256 } from '@/lib/blueprint/checksum';
 import { BlueprintStorage } from '@/lib/blueprint/blueprint-storage';
+import { detectBlueprintProfile } from '@/lib/blueprint/blueprint-detector';
 import { IngestionStatus, Blueprint } from '@/lib/types/architectural';
 import { useAxisProjectStore } from '@/store/project-store';
 import { useProjectWorkflowStore } from '@/store/project-workflow-store';
@@ -114,6 +115,13 @@ export default function ProjectBlueprintPage({
             height: dimensions?.height,
           });
 
+          const detectedProfileKey = detectBlueprintProfile({
+            filename: selectedFile.name,
+            name: selectedFile.name,
+            fileSize: selectedFile.size,
+            sourceChecksum: checksumSHA256,
+          });
+
           // Store blueprint metadata in Project state
           const newBlueprint: Blueprint = {
             id: blueprintId,
@@ -125,6 +133,7 @@ export default function ProjectBlueprintPage({
             status: 'READY',
             sourceChecksum: checksumSHA256,
             sourceUrl: previewUrl,
+            profile: detectedProfileKey,
             uploadedAt: new Date().toISOString(),
             width: dimensions?.width,
             height: dimensions?.height,

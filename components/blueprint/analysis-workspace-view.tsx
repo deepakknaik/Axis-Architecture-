@@ -90,6 +90,11 @@ export function AnalysisWorkspaceView({
     const candidate =
       (currentBlueprint && (currentBlueprint.projectId === projectId || !currentBlueprint.projectId) ? currentBlueprint : null) ||
       project?.blueprints?.[0];
+
+    if (candidate?.profile && candidate.profile !== 'BUNGALOW_10x12') {
+      return candidate.profile as BlueprintProfileKey;
+    }
+
     return detectBlueprintProfile({
       id: candidate?.id,
       filename: candidate?.filename,
@@ -97,7 +102,7 @@ export function AnalysisWorkspaceView({
       sourceUrl: candidate?.sourceUrl,
       sourceChecksum: candidate?.sourceChecksum,
       fileSize: candidate?.fileSize,
-      projectId,
+      projectId: candidate ? undefined : projectId,
     });
   }, [currentBlueprint, project?.blueprints, projectId]);
 
