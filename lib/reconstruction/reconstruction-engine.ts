@@ -260,10 +260,26 @@ export class ReconstructionEngine {
 
       // Associated doors
       doors3D
-        .filter((d) => d.floorId === ctx.floorId && (d.wallId === element.id || Math.hypot(d.position.x - (start3D.x + end3D.x)/2, d.position.z - (start3D.z + end3D.z)/2) < 1.0))
+        .filter((d) =>
+          d.floorId === ctx.floorId &&
+          (d.wallId
+            ? d.wallId === element.id
+            : Math.hypot(d.position.x - (start3D.x + end3D.x) / 2, d.position.z - (start3D.z + end3D.z) / 2) < 0.6)
+        )
         .forEach((d) => {
           // Distance along wall from start
-          const offset = Math.max(0.1, (lengthMeters - d.clearWidthMeters) / 2);
+          const wallVecX = end3D.x - start3D.x;
+          const wallVecZ = end3D.z - start3D.z;
+          const wallLenSq = wallVecX * wallVecX + wallVecZ * wallVecZ;
+          let offset = Math.max(0.1, (lengthMeters - d.clearWidthMeters) / 2);
+
+          if (wallLenSq > 0.001) {
+            const t = ((d.position.x - start3D.x) * wallVecX + (d.position.z - start3D.z) * wallVecZ) / wallLenSq;
+            if (t >= 0.05 && t <= 0.95) {
+              offset = Math.max(0.1, Math.min(lengthMeters - d.clearWidthMeters - 0.1, t * lengthMeters - d.clearWidthMeters / 2));
+            }
+          }
+
           wallOpenings.push({
             id: `op-${d.id}`,
             type: 'DOOR',
@@ -277,9 +293,25 @@ export class ReconstructionEngine {
 
       // Associated windows
       windows3D
-        .filter((w) => w.floorId === ctx.floorId && (w.wallId === element.id || Math.hypot(w.position.x - (start3D.x + end3D.x)/2, w.position.z - (start3D.z + end3D.z)/2) < 1.2))
+        .filter((w) =>
+          w.floorId === ctx.floorId &&
+          (w.wallId
+            ? w.wallId === element.id
+            : Math.hypot(w.position.x - (start3D.x + end3D.x) / 2, w.position.z - (start3D.z + end3D.z) / 2) < 0.8)
+        )
         .forEach((w) => {
-          const offset = Math.max(0.1, (lengthMeters - w.windowWidthMeters) / 2);
+          const wallVecX = end3D.x - start3D.x;
+          const wallVecZ = end3D.z - start3D.z;
+          const wallLenSq = wallVecX * wallVecX + wallVecZ * wallVecZ;
+          let offset = Math.max(0.1, (lengthMeters - w.windowWidthMeters) / 2);
+
+          if (wallLenSq > 0.001) {
+            const t = ((w.position.x - start3D.x) * wallVecX + (w.position.z - start3D.z) * wallVecZ) / wallLenSq;
+            if (t >= 0.05 && t <= 0.95) {
+              offset = Math.max(0.1, Math.min(lengthMeters - w.windowWidthMeters - 0.1, t * lengthMeters - w.windowWidthMeters / 2));
+            }
+          }
+
           wallOpenings.push({
             id: `op-${w.id}`,
             type: 'WINDOW',

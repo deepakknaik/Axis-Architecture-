@@ -165,6 +165,13 @@ def analyze_blueprint_image(image_path, target_units="METRIC", default_scale="1:
             if length_m < 0.6:
                 continue
 
+            # Filter out drawing sheet outer boundary frame / margin lines
+            margin_x = int(img_w * 0.05)
+            margin_y = int(img_h * 0.05)
+            if (y1 <= margin_y and y2 <= margin_y) or (y1 >= img_h - margin_y and y2 >= img_h - margin_y) or \
+               (x1 <= margin_x and x2 <= margin_x) or (x1 >= img_w - margin_x and x2 >= img_w - margin_x):
+                continue
+
             if dx > dy * 3: # Horizontal
                 mid_y = int((y1 + y2) / 2)
                 y1 = y2 = mid_y
