@@ -94,14 +94,14 @@ export default function AxisFoundationShowcasePage() {
           </FadeIn>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Link href={ROUTES.PROJECTS.WORKSPACE('proj_residence_01')}>
+            <Link href={ROUTES.AUTH.LOGIN}>
               <Button variant="primary" size="md" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Launch 3D Workspace
+                Get Started
               </Button>
             </Link>
             <Link href={ROUTES.PROJECTS.LIST}>
               <Button variant="secondary" size="md" leftIcon={<Layers className="w-4 h-4" />}>
-                Explore Projects
+                Projects
               </Button>
             </Link>
             <Link href="#design-system">
