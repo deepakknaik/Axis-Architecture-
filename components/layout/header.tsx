@@ -73,11 +73,6 @@ export function Header({ currentProjectTitle, className }: HeaderProps) {
           >
             Sign In
           </Link>
-          <div className="h-4 w-px bg-axis-border mx-1 hidden sm:block" />
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-axis-border bg-axis-surface/60 font-mono text-[10px] text-axis-text-muted select-none">
-            <Box className="w-3 h-3 text-axis-accent" />
-            <span>PART 02 · AUTH</span>
-          </div>
         </nav>
       </div>
     </header>

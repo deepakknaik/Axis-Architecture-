@@ -71,7 +71,7 @@ export default function AxisFoundationShowcasePage() {
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-center gap-2">
               <Badge variant="accent" size="sm" icon={<Compass className="w-3 h-3" />}>
-                PART 01 SPECIFICATION
+                SPATIAL PLATFORM
               </Badge>
               <Badge variant="subtle" size="sm">
                 Next.js 14 · Tailwind · TypeScript · Three.js
@@ -94,29 +94,21 @@ export default function AxisFoundationShowcasePage() {
           </FadeIn>
 
           <div className="flex flex-wrap items-center gap-3 pt-2">
-            <Link href={ROUTES.AUTH.LOGIN}>
+            <Link href={ROUTES.PROJECTS.WORKSPACE('proj_residence_01')}>
               <Button variant="primary" size="md" rightIcon={<ArrowRight className="w-4 h-4" />}>
-                Experience Login (Part 02)
-              </Button>
-            </Link>
-            <Link href="#design-system">
-              <Button variant="secondary" size="md">
-                Design System
+                Launch 3D Workspace
               </Button>
             </Link>
             <Link href={ROUTES.PROJECTS.LIST}>
-              <Button variant="outline" size="md" leftIcon={<Layers className="w-4 h-4" />}>
-                Routing Topology
+              <Button variant="secondary" size="md" leftIcon={<Layers className="w-4 h-4" />}>
+                Explore Projects
               </Button>
             </Link>
-            <Button
-              variant="outline"
-              size="md"
-              leftIcon={<Sliders className="w-4 h-4" />}
-              onClick={() => setIsModalOpen(true)}
-            >
-              Test Modal Component
-            </Button>
+            <Link href="#design-system">
+              <Button variant="outline" size="md">
+                Design System
+              </Button>
+            </Link>
           </div>
         </div>
       </ArchitecturalGrid>
@@ -588,7 +580,7 @@ export interface BaseArchitecturalElement {
                 </span>
                 <CardTitle className="mt-1">Prepared Route Topology</CardTitle>
                 <CardDescription>
-                  Controlled build roadmap for upcoming Part 02 and Part 03 releases.
+                  Production release architecture for spatial intelligence and 3D reconstruction.
                 </CardDescription>
               </div>
               <StatusBadge status="READY" size="sm" />

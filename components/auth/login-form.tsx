@@ -433,7 +433,7 @@ export function LoginForm() {
         <div className="space-y-3 text-xs text-axis-text-secondary">
           <p>
             Google Workspace Federated Authentication is configured for domain-authenticated
-            architectural studios in Part 02 prototype mode.
+            architectural studios in studio production mode.
           </p>
           <div className="p-3 rounded bg-axis-surface border border-axis-border font-mono text-[11px] text-axis-text-primary">
             FEDERATION STATUS: STANDBY (PROTOTYPE READY)
