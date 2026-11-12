@@ -40,6 +40,7 @@ import {
   Palette,
   Sun,
   FileText,
+  FileDown,
 } from 'lucide-react';
 import { BuildingModel, Room3D, BuildingFloor, Point3D } from '@/lib/reconstruction/types';
 import {
@@ -55,6 +56,7 @@ import { TouchPadsState, WalkthroughSpeedMode, StepCadenceInfo } from './walkthr
 import { WalkthroughMinimap } from './walkthrough-minimap';
 import { MaterialSwatchPanel } from './material-swatch-panel';
 import { SolarSliderControl } from './solar-slider-control';
+import { BIMReportModal } from './bim-report-modal';
 import {
   MaterialCustomizationState,
   DEFAULT_MATERIAL_CUSTOMIZATION,
@@ -137,6 +139,7 @@ export function ViewerCanvas({
   const [timeOfDay, setTimeOfDay] = React.useState<number>(14.5); // Default: 2:30 PM (crisp afternoon sun)
   const [isSunPlaying, setIsSunPlaying] = React.useState(false);
   const [showSolarControl, setShowSolarControl] = React.useState(false);
+  const [showReportModal, setShowReportModal] = React.useState(false);
 
   const solarParams = React.useMemo(() => computeSolarParameters(timeOfDay), [timeOfDay]);
 
@@ -688,17 +691,16 @@ export function ViewerCanvas({
                 </span>
               </button>
 
-              {/* 1-Click Project Exhibition Poster (Review II) */}
-              <a
-                href="/poster"
-                target="_blank"
-                rel="noreferrer"
-                title="View & Print Official Project Exhibition Poster (Review II)"
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-medium transition-all shadow ml-1 border bg-purple-950/80 hover:bg-purple-900 border-purple-600/50 text-purple-200"
+              {/* 1-Click BIM Architectural Output Report (PDF Download) */}
+              <button
+                type="button"
+                onClick={() => setShowReportModal(true)}
+                title="Download Comprehensive Architectural Output Takeoff Report (PDF)"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-medium transition-all shadow ml-1 border bg-blue-950/80 hover:bg-blue-900 border-blue-600/50 text-blue-200"
               >
-                <FileText className="w-3.5 h-3.5 text-purple-400" />
-                <span className="hidden sm:inline">Poster</span>
-              </a>
+                <FileDown className="w-3.5 h-3.5 text-blue-400" />
+                <span className="hidden sm:inline">PDF Report</span>
+              </button>
             </div>
           </motion.div>
         )}
@@ -1259,6 +1261,15 @@ export function ViewerCanvas({
         onClose={() => setIsMaterialPanelOpen(false)}
         materialState={materialState}
         onMaterialChange={setMaterialState}
+      />
+
+      {/* Comprehensive Architectural Output Report Modal (PDF Takeoff & Export) */}
+      <BIMReportModal
+        isOpen={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        model={model}
+        materialCustomization={materialState}
+        solarParams={solarParams}
       />
     </div>
   );
