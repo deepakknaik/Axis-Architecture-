@@ -3,10 +3,12 @@
 import * as React from 'react';
 import * as THREE from 'three';
 import { BuildingModel } from '@/lib/reconstruction/types';
+import { SolarParameters } from '@/lib/reconstruction/solar-types';
 
 export interface ArchitecturalLightingProps {
   model: BuildingModel;
   isWalkthrough?: boolean;
+  solarParams?: SolarParameters;
 }
 
 /**
@@ -19,7 +21,9 @@ export interface ArchitecturalLightingProps {
 export function ArchitecturalLighting({
   model,
   isWalkthrough = false,
+  solarParams,
 }: ArchitecturalLightingProps) {
+  const mult = solarParams ? solarParams.artificialMultiplier : 1.0;
   const { boundingBox, dimensions } = model;
   const cx = (boundingBox.min.x + boundingBox.max.x) / 2;
   const cz = (boundingBox.min.z + boundingBox.max.z) / 2;
@@ -76,7 +80,7 @@ export function ArchitecturalLighting({
             position={[0, -0.05, 0]}
             target-position={[0, -3.0, 0]}
             color="#FFD699"
-            intensity={isWalkthrough ? 1.6 : 2.4}
+            intensity={(isWalkthrough ? 1.6 : 2.4) * mult}
             distance={5.5}
             angle={Math.PI / 3.8}
             penumbra={0.65}
@@ -103,7 +107,7 @@ export function ArchitecturalLighting({
             <meshStandardMaterial
               color="#FFA726"
               emissive="#FF9800"
-              emissiveIntensity={2.8}
+              emissiveIntensity={2.8 * Math.min(2.0, mult)}
             />
           </mesh>
 
@@ -117,7 +121,7 @@ export function ArchitecturalLighting({
           <pointLight
             position={[0, 0.36, 0]}
             color="#FFB300"
-            intensity={1.1}
+            intensity={1.1 * mult}
             distance={2.8}
             decay={2.0}
           />
@@ -128,14 +132,14 @@ export function ArchitecturalLighting({
       <pointLight
         position={[cx - 1.5, 2.4, cz - 1.0]}
         color="#FFE0B2"
-        intensity={isWalkthrough ? 1.8 : 1.4}
+        intensity={(isWalkthrough ? 1.8 : 1.4) * mult}
         distance={9.0}
         decay={2.0}
       />
       <pointLight
         position={[cx + 1.8, 2.4, cz + 1.2]}
         color="#FFE0B2"
-        intensity={isWalkthrough ? 1.8 : 1.4}
+        intensity={(isWalkthrough ? 1.8 : 1.4) * mult}
         distance={9.0}
         decay={2.0}
       />
@@ -145,7 +149,7 @@ export function ArchitecturalLighting({
         <pointLight
           position={[cx, 5.4, cz]}
           color="#FFE0B2"
-          intensity={1.2}
+          intensity={1.2 * mult}
           distance={10.0}
           decay={2.0}
         />

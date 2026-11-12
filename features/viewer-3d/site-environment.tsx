@@ -3,15 +3,18 @@
 import * as React from 'react';
 import * as THREE from 'three';
 import { BuildingModel } from '@/lib/reconstruction/types';
+import { SolarParameters } from '@/lib/reconstruction/solar-types';
 
 export interface SiteEnvironmentProps {
   model: BuildingModel;
   isWalkthrough?: boolean;
+  solarParams?: SolarParameters;
 }
 
 export function SiteEnvironment({
   model,
   isWalkthrough = false,
+  solarParams,
 }: SiteEnvironmentProps) {
   const { boundingBox, dimensions } = model;
   const cx = (boundingBox.min.x + boundingBox.max.x) / 2;
@@ -28,9 +31,16 @@ export function SiteEnvironment({
 
   return (
     <group>
-      {/* 1. Atmospheric Sky & Fog */}
-      <color attach="background" args={['#dde7ee']} />
-      <fog attach="fog" args={['#dde7ee', 40, 125]} />
+      {/* 1. Atmospheric Sky & Fog (Dynamic Solar Study) */}
+      <color attach="background" args={[solarParams ? solarParams.skyColor : '#dde7ee']} />
+      <fog
+        attach="fog"
+        args={[
+          solarParams ? solarParams.fogColor : '#dde7ee',
+          solarParams && solarParams.timeOfDay >= 19.5 ? 25 : 40,
+          solarParams && solarParams.timeOfDay >= 19.5 ? 90 : 125,
+        ]}
+      />
 
       {/* 2. Soft Sage Green Landscaped Ground Plane */}
       <mesh
@@ -40,7 +50,7 @@ export function SiteEnvironment({
       >
         <planeGeometry args={[95, 95]} />
         <meshStandardMaterial
-          color="#ADBFA7"
+          color={solarParams && solarParams.timeOfDay >= 19.0 ? '#1E2B20' : '#ADBFA7'}
           roughness={0.98}
           metalness={0.02}
         />

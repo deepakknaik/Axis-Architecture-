@@ -38,6 +38,7 @@ import {
   Layers2,
   CheckCircle2,
   Palette,
+  Sun,
 } from 'lucide-react';
 import { BuildingModel, Room3D, BuildingFloor, Point3D } from '@/lib/reconstruction/types';
 import {
@@ -52,10 +53,15 @@ import { BuildingScene } from './building-scene';
 import { TouchPadsState } from './walkthrough-controller';
 import { WalkthroughMinimap } from './walkthrough-minimap';
 import { MaterialSwatchPanel } from './material-swatch-panel';
+import { SolarSliderControl } from './solar-slider-control';
 import {
   MaterialCustomizationState,
   DEFAULT_MATERIAL_CUSTOMIZATION,
 } from '@/lib/reconstruction/material-types';
+import {
+  SolarParameters,
+  computeSolarParameters,
+} from '@/lib/reconstruction/solar-types';
 
 export type Architectural3DViewMode = 'EXTERIOR' | 'DOLLHOUSE' | 'CUTAWAY' | 'INTERIOR' | 'BIM';
 export type UnitSystem = 'METRIC' | 'IMPERIAL';
@@ -125,6 +131,13 @@ export function ViewerCanvas({
     DEFAULT_MATERIAL_CUSTOMIZATION
   );
   const [isMaterialPanelOpen, setIsMaterialPanelOpen] = React.useState(false);
+
+  // Solar Simulation & Sun Study State (Matching Reference Feature)
+  const [timeOfDay, setTimeOfDay] = React.useState<number>(14.5); // Default: 2:30 PM (crisp afternoon sun)
+  const [isSunPlaying, setIsSunPlaying] = React.useState(false);
+  const [showSolarControl, setShowSolarControl] = React.useState(false);
+
+  const solarParams = React.useMemo(() => computeSolarParameters(timeOfDay), [timeOfDay]);
 
   React.useEffect(() => {
     setInternalFloorId(activeFloorId);
@@ -358,6 +371,7 @@ export function ViewerCanvas({
           isExplodedView={isExploded}
           onPlayerPoseChange={(pos, yaw) => setPlayerPose({ ...pos, yaw })}
           materialCustomization={materialState}
+          solarParams={solarParams}
         />
       </Canvas>
 
@@ -403,7 +417,42 @@ export function ViewerCanvas({
           <Palette className="w-3.5 h-3.5" />
           <span>Materials</span>
         </button>
+
+        {/* Sun Study / Day & Night Simulation Toggle */}
+        <button
+          type="button"
+          onClick={() => setShowSolarControl(!showSolarControl)}
+          title="Real-Time Sun Study & Day/Night Solar Simulation"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+            showSolarControl
+              ? 'bg-amber-600 text-white shadow-lg font-bold'
+              : 'text-stone-300 hover:text-white hover:bg-stone-800'
+          }`}
+        >
+          <Sun className="w-3.5 h-3.5" />
+          <span>Sun Study</span>
+        </button>
       </div>
+
+      {/* Floating Solar Simulation Slider (Sun Study HUD) */}
+      <AnimatePresence>
+        {showSolarControl && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.18 }}
+            className="absolute top-16 left-1/2 -translate-x-1/2 z-20"
+          >
+            <SolarSliderControl
+              timeOfDay={timeOfDay}
+              onChangeTimeOfDay={setTimeOfDay}
+              isPlaying={isSunPlaying}
+              onTogglePlay={() => setIsSunPlaying(!isSunPlaying)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* INSPECT MODE: Floating Secondary Architectural Toolbars */}
       <AnimatePresence>

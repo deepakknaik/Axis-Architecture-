@@ -22,6 +22,7 @@ import { SiteEnvironment } from './site-environment';
 import { ArchitecturalLighting } from './architectural-lighting';
 import { exportBuildingModelToGLB } from './model-exporter';
 import { MaterialCustomizationState } from '@/lib/reconstruction/material-types';
+import { SolarParameters } from '@/lib/reconstruction/solar-types';
 
 export interface BuildingSceneProps {
   model: BuildingModel;
@@ -54,6 +55,7 @@ export interface BuildingSceneProps {
   isExplodedView?: boolean;
   onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
   materialCustomization?: MaterialCustomizationState;
+  solarParams?: SolarParameters;
 }
 
 export function BuildingScene({
@@ -87,6 +89,7 @@ export function BuildingScene({
   isExplodedView = false,
   onPlayerPoseChange,
   materialCustomization,
+  solarParams,
 }: BuildingSceneProps) {
   const controlsRef = React.useRef<OrbitControlsImpl>(null);
   const buildingGroupRef = React.useRef<THREE.Group>(null);
@@ -186,17 +189,28 @@ export function BuildingScene({
       )}
 
       {/* 2. Site Environment (Sky, Fog, Lawn, Concrete Plinth, Steps & Landscaping) */}
-      <SiteEnvironment model={model} isWalkthrough={mode === 'WALKTHROUGH'} />
+      <SiteEnvironment
+        model={model}
+        isWalkthrough={mode === 'WALKTHROUGH'}
+        solarParams={solarParams}
+      />
 
       {/* 2b. Warm Architectural Soffit Spotlights & Landscape Lighting (Matching Reference Panel 1) */}
-      <ArchitecturalLighting model={model} isWalkthrough={mode === 'WALKTHROUGH'} />
+      <ArchitecturalLighting
+        model={model}
+        isWalkthrough={mode === 'WALKTHROUGH'}
+        solarParams={solarParams}
+      />
 
-      {/* 3. Natural Architectural Sun & Sky Lighting */}
-      <ambientLight intensity={mode === 'WALKTHROUGH' ? 0.75 : 0.55} color="#FFFBF2" />
+      {/* 3. Dynamic Natural Architectural Sun & Sky Lighting (Solar Simulation) */}
+      <ambientLight
+        intensity={solarParams ? solarParams.ambientIntensity : mode === 'WALKTHROUGH' ? 0.75 : 0.55}
+        color={solarParams ? solarParams.ambientColor : '#FFFBF2'}
+      />
       <directionalLight
-        position={[12, 22, 14]}
-        intensity={mode === 'WALKTHROUGH' ? 0.9 : 1.25}
-        color="#FFF3DF"
+        position={solarParams ? solarParams.sunPosition : [12, 22, 14]}
+        intensity={solarParams ? solarParams.sunIntensity : mode === 'WALKTHROUGH' ? 0.9 : 1.25}
+        color={solarParams ? solarParams.sunColor : '#FFF3DF'}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -208,7 +222,11 @@ export function BuildingScene({
         shadow-bias={-0.0006}
       />
       <hemisphereLight
-        args={['#FFFFFF', '#7B8896', mode === 'WALKTHROUGH' ? 0.85 : 0.62]}
+        args={[
+          '#FFFFFF',
+          solarParams ? solarParams.hemisphereGroundColor : '#7B8896',
+          mode === 'WALKTHROUGH' ? 0.85 : 0.62,
+        ]}
       />
 
       {/* 4. Optional Ground Architectural Grid */}
