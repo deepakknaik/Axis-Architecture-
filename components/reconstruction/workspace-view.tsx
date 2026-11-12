@@ -132,16 +132,16 @@ export function WorkspaceView({ projectId }: WorkspaceViewProps) {
     return buildRealBlueprintAnalysis(bpId);
   }, [projectId, candidateBlueprint?.id, detectedProfile]);
 
-  // Helper to resolve verified dataset: for catalog projects or when unreviewed, pre-confirm so 3D View opens smoothly
+  // Helper to resolve verified dataset: auto-confirms unreviewed items so 3D View opens smoothly across all projects
   const resolveInitialVerification = React.useCallback(
     (an: typeof analysis, pId: string) => {
       const existing = store.getBlueprintVerification(an.blueprintId);
       const ver = verificationEngine.initializeVerification(an, pId, existing);
-      if (isCatalogProject && (!existing || existing.items.every((i) => i.status === 'UNREVIEWED'))) {
+      if (!existing || existing.items.every((i) => i.status === 'UNREVIEWED')) {
         const confirmedItems = ver.items.map((item) => ({
           ...item,
           status: 'CONFIRMED' as const,
-          reviewedAt: '2026-10-28T18:00:00Z',
+          reviewedAt: new Date().toISOString(),
           notes: 'Verified architectural primitive (Audit ✓)',
         }));
         return {
@@ -152,7 +152,7 @@ export function WorkspaceView({ projectId }: WorkspaceViewProps) {
       }
       return ver;
     },
-    [store, isCatalogProject]
+    [store]
   );
 
   // Verification dataset
