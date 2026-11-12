@@ -15,6 +15,7 @@ import { RoofMesh } from './roof-mesh';
 import { RoomLabels3D } from './room-labels-3d';
 import { InteriorFixturesGroup } from './interior-fixtures-group';
 import { ExplodedGuideLines } from './exploded-guide-lines';
+import { MaterialCustomizationState } from '@/lib/reconstruction/material-types';
 
 export interface BuildingModelGroupProps {
   model: BuildingModel;
@@ -27,6 +28,7 @@ export interface BuildingModelGroupProps {
   activeFloorId?: string | 'ALL';
   fadeNonSelectedFloors?: boolean;
   isExplodedView?: boolean;
+  materialCustomization?: MaterialCustomizationState;
 }
 
 export function BuildingModelGroup({
@@ -40,6 +42,7 @@ export function BuildingModelGroup({
   activeFloorId = 'ALL',
   fadeNonSelectedFloors = true,
   isExplodedView = false,
+  materialCustomization,
 }: BuildingModelGroupProps) {
   return (
     <group
@@ -81,6 +84,7 @@ export function BuildingModelGroup({
                   isHovered={hoveredElementId === room.id}
                   onSelect={onSelectElement}
                   onHover={onHoverElement}
+                  customFloorMaterial={materialCustomization?.floor}
                 />
               ))}
 
@@ -95,6 +99,7 @@ export function BuildingModelGroup({
                   onSelect={onSelectElement}
                   onHover={onHoverElement}
                   wireframe={wireframe}
+                  customWallMaterial={materialCustomization?.wall}
                 />
               ))}
 
@@ -196,6 +201,7 @@ export function BuildingModelGroup({
           wireframe={wireframe}
           activeFloorId={activeFloorId}
           isExplodedView={isExplodedView}
+          customRoofMaterial={materialCustomization?.roof}
         />
       )}
 

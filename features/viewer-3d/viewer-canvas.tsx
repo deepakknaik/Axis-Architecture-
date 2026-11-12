@@ -37,6 +37,7 @@ import {
   Building2,
   Layers2,
   CheckCircle2,
+  Palette,
 } from 'lucide-react';
 import { BuildingModel, Room3D, BuildingFloor, Point3D } from '@/lib/reconstruction/types';
 import {
@@ -50,6 +51,11 @@ import {
 import { BuildingScene } from './building-scene';
 import { TouchPadsState } from './walkthrough-controller';
 import { WalkthroughMinimap } from './walkthrough-minimap';
+import { MaterialSwatchPanel } from './material-swatch-panel';
+import {
+  MaterialCustomizationState,
+  DEFAULT_MATERIAL_CUSTOMIZATION,
+} from '@/lib/reconstruction/material-types';
 
 export type Architectural3DViewMode = 'EXTERIOR' | 'DOLLHOUSE' | 'CUTAWAY' | 'INTERIOR' | 'BIM';
 export type UnitSystem = 'METRIC' | 'IMPERIAL';
@@ -113,6 +119,12 @@ export function ViewerCanvas({
   const [unitSystem, setUnitSystem] = React.useState<UnitSystem>('METRIC');
   const [isExploded, setIsExploded] = React.useState(false);
   const [internalFloorId, setInternalFloorId] = React.useState<string | 'ALL'>(activeFloorId);
+
+  // Material Swatch Customizer State (Matching Reference Board: Material View)
+  const [materialState, setMaterialState] = React.useState<MaterialCustomizationState>(
+    DEFAULT_MATERIAL_CUSTOMIZATION
+  );
+  const [isMaterialPanelOpen, setIsMaterialPanelOpen] = React.useState(false);
 
   React.useEffect(() => {
     setInternalFloorId(activeFloorId);
@@ -345,6 +357,7 @@ export function ViewerCanvas({
           }}
           isExplodedView={isExploded}
           onPlayerPoseChange={(pos, yaw) => setPlayerPose({ ...pos, yaw })}
+          materialCustomization={materialState}
         />
       </Canvas>
 
@@ -374,6 +387,22 @@ export function ViewerCanvas({
             </button>
           );
         })}
+
+        {/* Material Swatch Customizer Toggle (Matching Reference Board: Material View) */}
+        <div className="w-[1px] h-5 bg-stone-700/80 mx-1" />
+        <button
+          type="button"
+          onClick={() => setIsMaterialPanelOpen(!isMaterialPanelOpen)}
+          title="Customize Architectural PBR Materials (Floors, Walls, Roof)"
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-mono transition-all ${
+            isMaterialPanelOpen
+              ? 'bg-amber-600 text-white shadow-lg font-bold'
+              : 'text-amber-400 hover:text-white hover:bg-stone-800'
+          }`}
+        >
+          <Palette className="w-3.5 h-3.5" />
+          <span>Materials</span>
+        </button>
       </div>
 
       {/* INSPECT MODE: Floating Secondary Architectural Toolbars */}
@@ -1107,6 +1136,14 @@ export function ViewerCanvas({
           </div>
         </div>
       )}
+
+      {/* Material Swatch Customizer Panel (Matching Reference Board: Material View) */}
+      <MaterialSwatchPanel
+        isOpen={isMaterialPanelOpen}
+        onClose={() => setIsMaterialPanelOpen(false)}
+        materialState={materialState}
+        onMaterialChange={setMaterialState}
+      />
     </div>
   );
 }

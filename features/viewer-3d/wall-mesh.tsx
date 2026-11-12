@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as THREE from 'three';
 import { Wall3D, WallSubSegment3D } from '@/lib/reconstruction/types';
+import { WallMaterialKey, WALL_MATERIALS } from '@/lib/reconstruction/material-types';
 
 export interface WallMeshProps {
   wall: Wall3D;
@@ -11,6 +12,7 @@ export interface WallMeshProps {
   onSelect?: (elementId: string) => void;
   onHover?: (elementId: string | null) => void;
   wireframe?: boolean;
+  customWallMaterial?: WallMaterialKey;
 }
 
 export function WallMesh({
@@ -20,6 +22,7 @@ export function WallMesh({
   onSelect,
   onHover,
   wireframe = false,
+  customWallMaterial,
 }: WallMeshProps) {
   // Memoize box geometries for each subsegment of the wall
   const segmentsData = React.useMemo(() => {
@@ -62,13 +65,24 @@ export function WallMesh({
         metalness: 0.05,
       };
     }
+
+    // Interactive Custom Material Override (Wall Palette)
+    if (customWallMaterial && WALL_MATERIALS[customWallMaterial]) {
+      const spec = WALL_MATERIALS[customWallMaterial];
+      return {
+        color: wall.classification === 'EXTERIOR' ? spec.color : '#FAF8F4',
+        roughness: spec.roughness,
+        metalness: spec.metalness,
+      };
+    }
+
     // Standard warm architectural limestone / crisp modern stucco
     return {
       color: wall.classification === 'EXTERIOR' ? '#F6F4EE' : '#FAF8F4',
       roughness: 0.82,
       metalness: 0.03,
     };
-  }, [isSelected, isHovered, wall.classification]);
+  }, [isSelected, isHovered, wall.classification, customWallMaterial]);
 
   const hasDoor = Boolean(wall.openings?.some((o) => o.type === 'DOOR'));
 

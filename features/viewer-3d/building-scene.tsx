@@ -21,6 +21,7 @@ import { MeasurementOverlay } from './measurement-overlay';
 import { SiteEnvironment } from './site-environment';
 import { ArchitecturalLighting } from './architectural-lighting';
 import { exportBuildingModelToGLB } from './model-exporter';
+import { MaterialCustomizationState } from '@/lib/reconstruction/material-types';
 
 export interface BuildingSceneProps {
   model: BuildingModel;
@@ -52,6 +53,7 @@ export interface BuildingSceneProps {
   onRegisterExporter?: (fn: () => Promise<void>) => void;
   isExplodedView?: boolean;
   onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
+  materialCustomization?: MaterialCustomizationState;
 }
 
 export function BuildingScene({
@@ -84,6 +86,7 @@ export function BuildingScene({
   onRegisterExporter,
   isExplodedView = false,
   onPlayerPoseChange,
+  materialCustomization,
 }: BuildingSceneProps) {
   const controlsRef = React.useRef<OrbitControlsImpl>(null);
   const buildingGroupRef = React.useRef<THREE.Group>(null);
@@ -235,6 +238,7 @@ export function BuildingScene({
           activeFloorId={activeFloorId}
           fadeNonSelectedFloors={fadeNonSelectedFloors}
           isExplodedView={isExplodedView}
+          materialCustomization={materialCustomization}
         />
       </group>
 

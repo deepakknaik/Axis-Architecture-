@@ -3,6 +3,7 @@
 import * as React from 'react';
 import * as THREE from 'three';
 import { BuildingModel } from '@/lib/reconstruction/types';
+import { RoofMaterialKey, ROOF_MATERIALS } from '@/lib/reconstruction/material-types';
 
 export interface RoofMeshProps {
   model: BuildingModel;
@@ -10,6 +11,7 @@ export interface RoofMeshProps {
   wireframe?: boolean;
   activeFloorId?: string | 'ALL';
   isExplodedView?: boolean;
+  customRoofMaterial?: RoofMaterialKey;
 }
 
 export function RoofMesh({
@@ -18,6 +20,7 @@ export function RoofMesh({
   wireframe = false,
   activeFloorId = 'ALL',
   isExplodedView = false,
+  customRoofMaterial,
 }: RoofMeshProps) {
   const roofGeometry = React.useMemo(() => {
     const { dimensions } = model;
@@ -74,6 +77,10 @@ export function RoofMesh({
   const { dimensions } = model;
   const ridgeHeight = Math.min(2.2, Math.max(1.4, dimensions.depthMeters * 0.22));
 
+  const roofMatSpec = customRoofMaterial && ROOF_MATERIALS[customRoofMaterial]
+    ? ROOF_MATERIALS[customRoofMaterial]
+    : { color: '#282D36', roughness: 0.65, metalness: 0.18 };
+
   return (
     <group position={[centerX, baseElevation + ridgeHeight / 2, centerZ]}>
       {/* Pitched Roof Mesh (Rotated 90 deg so ridge runs along X-axis) */}
@@ -84,9 +91,9 @@ export function RoofMesh({
         receiveShadow
       >
         <meshStandardMaterial
-          color="#282D36"
-          roughness={0.65}
-          metalness={0.18}
+          color={roofMatSpec.color}
+          roughness={roofMatSpec.roughness}
+          metalness={roofMatSpec.metalness}
           side={THREE.DoubleSide}
           wireframe={wireframe}
         />

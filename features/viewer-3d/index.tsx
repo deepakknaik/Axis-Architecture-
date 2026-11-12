@@ -63,3 +63,4 @@ export { SiteEnvironment } from './site-environment';
 export { ArchitecturalLighting } from './architectural-lighting';
 export { ExplodedGuideLines } from './exploded-guide-lines';
 export { WalkthroughMinimap } from './walkthrough-minimap';
+export { MaterialSwatchPanel } from './material-swatch-panel';

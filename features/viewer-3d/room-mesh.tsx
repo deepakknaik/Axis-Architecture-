@@ -4,6 +4,7 @@ import * as React from 'react';
 import * as THREE from 'three';
 import { Html, Line } from '@react-three/drei';
 import { Room3D } from '@/lib/reconstruction/types';
+import { FloorMaterialKey, FLOOR_MATERIALS } from '@/lib/reconstruction/material-types';
 
 export interface RoomMeshProps {
   room: Room3D;
@@ -11,6 +12,7 @@ export interface RoomMeshProps {
   isHovered?: boolean;
   onSelect?: (elementId: string) => void;
   onHover?: (elementId: string | null) => void;
+  customFloorMaterial?: FloorMaterialKey;
 }
 
 export function RoomMesh({
@@ -19,6 +21,7 @@ export function RoomMesh({
   isHovered = false,
   onSelect,
   onHover,
+  customFloorMaterial,
 }: RoomMeshProps) {
   // Construct Three.Shape from room boundary polygon
   const { shape, linePoints } = React.useMemo(() => {
@@ -44,13 +47,25 @@ export function RoomMesh({
     return { shape: s, linePoints: pts };
   }, [room.boundaryPolygon]);
 
-  // Architectural Floor Finish based on Space Type
+  // Architectural Floor Finish based on Custom Material or Space Type
   const materialProps = React.useMemo(() => {
     if (isSelected) {
-      return { color: '#D47343', roughness: 0.6, metalness: 0.1 };
+      return { color: '#D47343', roughness: 0.6, metalness: 0.1, clearcoat: 0.3, clearcoatRoughness: 0.2 };
     }
     if (isHovered) {
-      return { color: '#E4DDD2', roughness: 0.6, metalness: 0.05 };
+      return { color: '#E4DDD2', roughness: 0.6, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.2 };
+    }
+
+    // Interactive Custom Material Override (Floor Palette)
+    if (customFloorMaterial && FLOOR_MATERIALS[customFloorMaterial]) {
+      const spec = FLOOR_MATERIALS[customFloorMaterial];
+      return {
+        color: spec.color,
+        roughness: spec.roughness,
+        metalness: spec.metalness,
+        clearcoat: spec.clearcoat ?? 0.6,
+        clearcoatRoughness: spec.clearcoatRoughness ?? 0.15,
+      };
     }
 
     const fn = room.roomFunction;
