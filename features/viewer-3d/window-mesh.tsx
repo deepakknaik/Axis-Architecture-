@@ -89,6 +89,35 @@ export function WindowMesh({
           wireframe={wireframe}
         />
       </mesh>
+
+      {/* 3. Window Security Grill Bars (Multi-pane security grid casting realistic room shadows) */}
+      {!wireframe && (
+        <group position={[0, h / 2, 0.012]}>
+          {/* Vertical security bars */}
+          {[-0.35, -0.175, 0, 0.175, 0.35].map((relX, idx) => (
+            <mesh
+              key={`grill-v-${idx}`}
+              position={[relX * (w - frameThickness * 2), 0, 0]}
+              castShadow
+            >
+              <cylinderGeometry args={[0.007, 0.007, h - frameThickness * 2, 8]} />
+              <meshStandardMaterial color="#EAEAEA" roughness={0.35} metalness={0.7} />
+            </mesh>
+          ))}
+          {/* Horizontal security crossbars */}
+          {[-0.28, 0, 0.28].map((relY, idx) => (
+            <mesh
+              key={`grill-h-${idx}`}
+              position={[0, relY * (h - frameThickness * 2), 0]}
+              rotation={[0, 0, Math.PI / 2]}
+              castShadow
+            >
+              <cylinderGeometry args={[0.007, 0.007, w - frameThickness * 2, 8]} />
+              <meshStandardMaterial color="#EAEAEA" roughness={0.35} metalness={0.7} />
+            </mesh>
+          ))}
+        </group>
+      )}
     </group>
   );
 }

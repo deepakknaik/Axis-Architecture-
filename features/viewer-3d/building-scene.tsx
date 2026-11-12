@@ -16,7 +16,7 @@ import {
 } from '@/lib/reconstruction/interaction-types';
 import { BuildingModelGroup } from './building-model';
 import { CameraController } from './camera-controller';
-import { WalkthroughController, TouchPadsState } from './walkthrough-controller';
+import { WalkthroughController, TouchPadsState, WalkthroughSpeedMode, StepCadenceInfo } from './walkthrough-controller';
 import { MeasurementOverlay } from './measurement-overlay';
 import { SiteEnvironment } from './site-environment';
 import { ArchitecturalLighting } from './architectural-lighting';
@@ -51,6 +51,10 @@ export interface BuildingSceneProps {
   touchPads?: TouchPadsState;
   onActiveRoomChange?: (roomName: string, areaSqMeters?: number) => void;
   walkthroughFov?: number;
+  speedMode?: WalkthroughSpeedMode;
+  enableHeadBob?: boolean;
+  resetStepTrigger?: number;
+  onStepCadenceChange?: (info: StepCadenceInfo) => void;
   onRegisterExporter?: (fn: () => Promise<void>) => void;
   isExplodedView?: boolean;
   onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
@@ -84,7 +88,11 @@ export function BuildingScene({
   onCollisionChange,
   touchPads,
   onActiveRoomChange,
-  walkthroughFov = 76,
+  walkthroughFov = 92,
+  speedMode = 'WALK',
+  enableHeadBob = true,
+  resetStepTrigger = 0,
+  onStepCadenceChange,
   onRegisterExporter,
   isExplodedView = false,
   onPlayerPoseChange,
@@ -183,6 +191,10 @@ export function BuildingScene({
           onCollisionChange={onCollisionChange}
           touchPads={touchPads}
           fov={walkthroughFov}
+          speedMode={speedMode}
+          enableHeadBob={enableHeadBob}
+          resetStepTrigger={resetStepTrigger}
+          onStepCadenceChange={onStepCadenceChange}
           onActiveRoomChange={onActiveRoomChange}
           onPlayerPoseChange={onPlayerPoseChange}
         />
@@ -257,6 +269,7 @@ export function BuildingScene({
           fadeNonSelectedFloors={fadeNonSelectedFloors}
           isExplodedView={isExplodedView}
           materialCustomization={materialCustomization}
+          isWalkthrough={mode === 'WALKTHROUGH'}
         />
       </group>
 

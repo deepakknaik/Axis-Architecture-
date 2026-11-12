@@ -86,11 +86,104 @@ export function InteriorFixturesGroup({
                       <boxGeometry args={[0.42, 0.44, 0.42]} />
                       <meshStandardMaterial color="#7A6048" roughness={0.7} />
                     </mesh>
-                    {/* Wardrobe Unit */}
-                    <mesh position={[cx + (isMirrored ? -w / 2 + 0.35 : w / 2 - 0.35), 1.05, cz + 0.5]} castShadow receiveShadow>
-                      <boxGeometry args={[0.55, 2.1, 1.6]} />
-                      <meshStandardMaterial color="#CFC6B6" roughness={0.8} />
-                    </mesh>
+                    {/* Upgraded 3-Door Wardrobe Unit with Center Full-Length Mirror (Matching User Photo 3) */}
+                    {(() => {
+                      const wardX = cx + (isMirrored ? -w / 2 + 0.35 : w / 2 - 0.35);
+                      const wardZ = cz + 0.5;
+                      const wardW = 0.55;
+                      const wardL = 1.65;
+                      const wardH = 2.1;
+                      return (
+                        <group key={`wardrobe-${room.id}`}>
+                          {/* Main Teak/Walnut Body */}
+                          <mesh position={[wardX, wardH / 2, wardZ]} castShadow receiveShadow>
+                            <boxGeometry args={[wardW, wardH, wardL]} />
+                            <meshStandardMaterial color="#4A3423" roughness={0.65} metalness={0.08} />
+                          </mesh>
+                          {/* Center Full-Length Dressing Mirror Panel */}
+                          <mesh
+                            position={[
+                              wardX + (isMirrored ? wardW / 2 + 0.005 : -wardW / 2 - 0.005),
+                              1.1,
+                              wardZ,
+                            ]}
+                            castShadow
+                          >
+                            <boxGeometry args={[0.01, 1.45, 0.52]} />
+                            <meshStandardMaterial
+                              color="#EBF0F5"
+                              roughness={0.04}
+                              metalness={0.96}
+                            />
+                          </mesh>
+                          {/* Door Handles / Lock Escutcheons */}
+                          <mesh
+                            position={[
+                              wardX + (isMirrored ? wardW / 2 + 0.012 : -wardW / 2 - 0.012),
+                              1.05,
+                              wardZ - 0.3,
+                            ]}
+                          >
+                            <boxGeometry args={[0.018, 0.12, 0.02]} />
+                            <meshStandardMaterial color="#D4AF37" roughness={0.3} metalness={0.9} />
+                          </mesh>
+                          <mesh
+                            position={[
+                              wardX + (isMirrored ? wardW / 2 + 0.012 : -wardW / 2 - 0.012),
+                              1.05,
+                              wardZ + 0.3,
+                            ]}
+                          >
+                            <boxGeometry args={[0.018, 0.12, 0.02]} />
+                            <meshStandardMaterial color="#D4AF37" roughness={0.3} metalness={0.9} />
+                          </mesh>
+
+                          {/* Overhead Concrete Storage Loft Slab with Luggage (Matching User Photo 3) */}
+                          <mesh
+                            position={[wardX, 2.28, wardZ]}
+                            castShadow
+                            receiveShadow
+                          >
+                            <boxGeometry args={[0.65, 0.08, wardL + 0.4]} />
+                            <meshStandardMaterial color="#EAE8E2" roughness={0.88} />
+                          </mesh>
+                          {/* Storage Suitcases / Boxes on Loft */}
+                          <mesh position={[wardX, 2.45, wardZ - 0.35]} castShadow>
+                            <boxGeometry args={[0.45, 0.25, 0.55]} />
+                            <meshStandardMaterial color="#334155" roughness={0.7} />
+                          </mesh>
+                          <mesh position={[wardX, 2.44, wardZ + 0.3]} castShadow>
+                            <boxGeometry args={[0.42, 0.22, 0.48]} />
+                            <meshStandardMaterial color="#854D0E" roughness={0.8} />
+                          </mesh>
+
+                          {/* Wall-Mounted Modular Electrical Switchboard Plate (Matching User Photo 1) */}
+                          <mesh
+                            position={[
+                              cx + (isMirrored ? -w / 2 + 0.015 : w / 2 - 0.015),
+                              1.15,
+                              cz - 0.8,
+                            ]}
+                          >
+                            <boxGeometry args={[0.015, 0.12, 0.22]} />
+                            <meshStandardMaterial color="#FAFAFA" roughness={0.3} metalness={0.1} />
+                          </mesh>
+
+                          {/* Wall-Mounted Horizontal LED Tube Light Fixture (Matching User Photo 1) */}
+                          <group position={[cx, 2.5, cz - d / 2 + 0.02]}>
+                            <mesh castShadow>
+                              <boxGeometry args={[1.2, 0.035, 0.04]} />
+                              <meshStandardMaterial
+                                color="#FFFFFF"
+                                emissive="#FFF8E7"
+                                emissiveIntensity={0.6}
+                                roughness={0.2}
+                              />
+                            </mesh>
+                          </group>
+                        </group>
+                      );
+                    })()}
                   </group>
                 );
               }

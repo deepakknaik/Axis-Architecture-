@@ -14,6 +14,15 @@ export interface TouchPadsState {
   turnRight: boolean;
 }
 
+export type WalkthroughSpeedMode = 'WALK' | 'BRISK' | 'RUN';
+
+export interface StepCadenceInfo {
+  steps: number;
+  distanceMeters: number;
+  paceSpeed: number;
+  strideMeters: number;
+}
+
 export interface WalkthroughControllerProps {
   model: BuildingModel;
   isActive: boolean;
@@ -21,10 +30,14 @@ export interface WalkthroughControllerProps {
   startPoint?: Point3D | null;
   touchPads?: TouchPadsState;
   fov?: number;
+  speedMode?: WalkthroughSpeedMode;
+  enableHeadBob?: boolean;
+  resetStepTrigger?: number;
   onExit: () => void;
   onCollisionChange?: (wallId: string | null) => void;
   onActiveRoomChange?: (roomName: string, areaSqMeters?: number) => void;
   onPlayerPoseChange?: (pos: { x: number; y: number; z: number }, yaw: number) => void;
+  onStepCadenceChange?: (info: StepCadenceInfo) => void;
 }
 
 export function WalkthroughController({
@@ -33,18 +46,38 @@ export function WalkthroughController({
   activeFloorId,
   startPoint,
   touchPads,
-  fov = 76,
+  fov = 92, // Default 92° matches human binocular panoramic vision (open & wide)
+  speedMode = 'WALK',
+  enableHeadBob = true,
+  resetStepTrigger = 0,
   onExit,
   onCollisionChange,
   onActiveRoomChange,
   onPlayerPoseChange,
+  onStepCadenceChange,
 }: WalkthroughControllerProps) {
   const { camera, gl } = useThree();
 
   // Internal Walkthrough State
-  const EYE_HEIGHT = 1.62; // CAMERA HEIGHT ASSUMED (Nominal architectural eye-level)
-  const CLEARANCE_MARGIN = 0.18; // Smooth collision buffer allowing easy doorway traversal
-  const BASE_SPEED = 3.6; // Meters per second
+  // Calibrated to realistic human domestic architecture:
+  // - Human Indoor Walk: 1.18 m/s with 0.48m stride -> 25 steps across a 12-meter room!
+  // - Brisk Walk: 1.85 m/s with 0.65m stride -> 18 steps across a 12-meter room
+  // - Inspect Sprint: 3.2 m/s with 0.85m stride
+  const EYE_HEIGHT = 1.62; // Architectural eye-level (1.62m for a 1.72m human)
+  const CLEARANCE_MARGIN = 0.16; // Smooth collision buffer allowing easy doorway traversal
+
+  const speedConfig = React.useMemo(() => {
+    switch (speedMode) {
+      case 'WALK':
+        return { baseSpeed: 1.18, strideMeters: 0.48 };
+      case 'BRISK':
+        return { baseSpeed: 1.85, strideMeters: 0.65 };
+      case 'RUN':
+        return { baseSpeed: 3.2, strideMeters: 0.85 };
+      default:
+        return { baseSpeed: 1.18, strideMeters: 0.48 };
+    }
+  }, [speedMode]);
 
   const floor = React.useMemo(() => {
     if (activeFloorId && activeFloorId !== 'ALL') {
@@ -76,6 +109,24 @@ export function WalkthroughController({
 
   const isLocked = React.useRef(false);
   const lastReportedRoom = React.useRef<string>('');
+
+  // Human Stride & Cadence Tracking
+  const distanceTraversed = React.useRef(0);
+  const stepCount = React.useRef(0);
+  const headBobY = React.useRef(0);
+  const swayX = React.useRef(0);
+
+  // Reset steps when reset trigger increments or speed mode changes
+  React.useEffect(() => {
+    distanceTraversed.current = 0;
+    stepCount.current = 0;
+    onStepCadenceChange?.({
+      steps: 0,
+      distanceMeters: 0,
+      paceSpeed: speedConfig.baseSpeed,
+      strideMeters: speedConfig.strideMeters,
+    });
+  }, [resetStepTrigger, speedConfig, onStepCadenceChange]);
 
   // Adjust camera FOV for wide, spacious architectural walkthrough vision
   React.useEffect(() => {
@@ -250,7 +301,10 @@ export function WalkthroughController({
     camera.rotation.z = 0;
 
     // Movement delta
-    const speed = (keys.current.sprint ? BASE_SPEED * 1.8 : BASE_SPEED) * Math.min(delta, 0.1);
+    const currentSpeedVal = keys.current.sprint
+      ? speedConfig.baseSpeed * 1.65
+      : speedConfig.baseSpeed;
+    const speed = currentSpeedVal * Math.min(delta, 0.1);
 
     const moveVector = new THREE.Vector3();
     const moveF = keys.current.forward || Boolean(touchPads?.forward);
@@ -262,6 +316,9 @@ export function WalkthroughController({
     if (moveB) moveVector.z += 1;
     if (moveL) moveVector.x -= 1;
     if (moveR) moveVector.x += 1;
+
+    const prevX = playerPos.current.x;
+    const prevZ = playerPos.current.z;
 
     if (moveVector.lengthSq() > 0) {
       moveVector.normalize();
@@ -325,6 +382,32 @@ export function WalkthroughController({
       onCollisionChange?.(activeCollisionId);
     }
 
+    // Measure actual distance moved across plane
+    const movedDist = Math.hypot(playerPos.current.x - prevX, playerPos.current.z - prevZ);
+    if (movedDist > 0.0001) {
+      distanceTraversed.current += movedDist;
+      const currentSteps = Math.floor(distanceTraversed.current / speedConfig.strideMeters);
+      if (currentSteps !== stepCount.current) {
+        stepCount.current = currentSteps;
+        onStepCadenceChange?.({
+          steps: currentSteps,
+          distanceMeters: Number(distanceTraversed.current.toFixed(2)),
+          paceSpeed: currentSpeedVal,
+          strideMeters: speedConfig.strideMeters,
+        });
+      }
+
+      // Natural Human Step Cadence & Head Bobbing (Dip on footfall, crest at mid-stride)
+      if (enableHeadBob) {
+        const stepPhase = (distanceTraversed.current % speedConfig.strideMeters) / speedConfig.strideMeters;
+        headBobY.current = Math.sin(stepPhase * Math.PI * 2) * 0.022;
+        swayX.current = Math.sin((distanceTraversed.current / (speedConfig.strideMeters * 2)) * Math.PI * 2) * 0.01;
+      }
+    } else {
+      headBobY.current = THREE.MathUtils.damp(headBobY.current, 0, 9, delta);
+      swayX.current = THREE.MathUtils.damp(swayX.current, 0, 9, delta);
+    }
+
     // 4. Floor & Stair Elevation Constraint
     let targetElev = floorElev + EYE_HEIGHT;
 
@@ -348,7 +431,13 @@ export function WalkthroughController({
     }
 
     playerPos.current.y = targetElev;
-    camera.position.copy(playerPos.current);
+
+    // Camera takes player position + subtle organic human head bob
+    camera.position.set(
+      playerPos.current.x + swayX.current,
+      playerPos.current.y + headBobY.current,
+      playerPos.current.z
+    );
 
     // 5. Active Room Spatial Detection
     const curX = playerPos.current.x;

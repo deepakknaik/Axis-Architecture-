@@ -50,7 +50,7 @@ import {
   MeasurementItem,
 } from '@/lib/reconstruction/interaction-types';
 import { BuildingScene } from './building-scene';
-import { TouchPadsState } from './walkthrough-controller';
+import { TouchPadsState, WalkthroughSpeedMode, StepCadenceInfo } from './walkthrough-controller';
 import { WalkthroughMinimap } from './walkthrough-minimap';
 import { MaterialSwatchPanel } from './material-swatch-panel';
 import { SolarSliderControl } from './solar-slider-control';
@@ -202,7 +202,15 @@ export function ViewerCanvas({
 
   // Prototype Features: Mobile / Touch D-pad & Turn Controls
   const [showTouchControls, setShowTouchControls] = React.useState(true);
-  const [walkthroughFov, setWalkthroughFov] = React.useState<number>(78);
+  const [walkthroughFov, setWalkthroughFov] = React.useState<number>(92); // Default 92° matches human binocular vision (wide & unconfined)
+  const [walkthroughSpeedMode, setWalkthroughSpeedMode] = React.useState<WalkthroughSpeedMode>('WALK');
+  const [cadenceInfo, setCadenceInfo] = React.useState<StepCadenceInfo>({
+    steps: 0,
+    distanceMeters: 0,
+    paceSpeed: 1.18,
+    strideMeters: 0.48,
+  });
+  const [resetStepTrigger, setResetStepTrigger] = React.useState<number>(0);
   const [touchPads, setTouchPads] = React.useState<TouchPadsState>({
     forward: false,
     backward: false,
@@ -364,6 +372,9 @@ export function ViewerCanvas({
           onCollisionChange={setActiveCollisionWallId}
           touchPads={touchPads}
           walkthroughFov={walkthroughFov}
+          speedMode={walkthroughSpeedMode}
+          resetStepTrigger={resetStepTrigger}
+          onStepCadenceChange={setCadenceInfo}
           onActiveRoomChange={(name, area) => setActiveRoomInfo({ name, area })}
           onRegisterExporter={(fn) => {
             exporterRef.current = fn;
@@ -708,7 +719,7 @@ export function ViewerCanvas({
                   <span className="text-axis-terracotta hidden md:inline">CAMERA 1.65m EYE-LEVEL</span>
                 </div>
 
-                {/* Right: Dynamic "In [Room Name]" HUD + Touch Dpad Toggle + Exit */}
+                {/* Right: Dynamic "In [Room Name]" HUD + Footstep Counter + Pace + Lens + Exit */}
                 <div className="flex items-center gap-2">
                   {/* Prototype Feature: Live "In [Room Name]" HUD Badge */}
                   <div className="pointer-events-auto flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#0f172a]/95 border-l-4 border-l-blue-500 border border-stone-700/80 shadow-xl text-xs font-mono">
@@ -723,13 +734,53 @@ export function ViewerCanvas({
                     )}
                   </div>
 
-                  {/* Lens FOV Selector (Expands space perception) */}
+                  {/* Real-Time Footstep Counter (Calibrated to 0.48m human indoor stride - 25-30 steps for 12m) */}
+                  <div className="pointer-events-auto flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-900/90 border border-emerald-500/40 text-xs font-mono shadow-xl">
+                    <Footprints className="w-3.5 h-3.5 text-emerald-400" />
+                    <span className="font-bold text-emerald-300 text-sm">{cadenceInfo.steps}</span>
+                    <span className="text-stone-400">steps</span>
+                    <span className="text-stone-600">·</span>
+                    <span className="text-white font-semibold">{cadenceInfo.distanceMeters.toFixed(1)} m</span>
+                    <button
+                      type="button"
+                      onClick={() => setResetStepTrigger((t) => t + 1)}
+                      title="Reset step counter to 0 (walk and count steps across your room)"
+                      className="ml-1 px-1.5 py-0.5 rounded bg-stone-800 hover:bg-stone-700 text-[10px] text-stone-300 transition-colors"
+                    >
+                      Reset
+                    </button>
+                  </div>
+
+                  {/* Human Pace / Speed Mode Selector */}
+                  <div className="pointer-events-auto hidden lg:flex items-center gap-1 px-1.5 py-1 rounded-lg bg-stone-900/90 border border-stone-800 text-[11px] font-mono shadow-xl">
+                    <span className="text-stone-400 px-1">Pace:</span>
+                    {[
+                      ['WALK', '🚶 Walk (1.2m/s)'],
+                      ['BRISK', '🏃 Brisk (1.9m/s)'],
+                      ['RUN', '⚡ Sprint (3.2m/s)'],
+                    ].map(([val, lbl]) => (
+                      <button
+                        key={val}
+                        type="button"
+                        onClick={() => setWalkthroughSpeedMode(val as WalkthroughSpeedMode)}
+                        className={`px-2 py-0.5 rounded transition-colors ${
+                          walkthroughSpeedMode === val
+                            ? 'bg-emerald-600 text-white font-bold'
+                            : 'text-stone-400 hover:text-white hover:bg-stone-800'
+                        }`}
+                      >
+                        {lbl}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Lens FOV Selector (Expands space perception to human binocular vision - wide room) */}
                   <div className="pointer-events-auto hidden md:flex items-center gap-1 px-1.5 py-1 rounded-lg bg-stone-900/90 border border-stone-800 text-[11px] font-mono shadow-xl">
                     <span className="text-stone-400 px-1">Lens:</span>
                     {[
-                      [72, 'Standard'],
-                      [78, 'Wide'],
-                      [86, 'Grand'],
+                      [84, '84° Normal'],
+                      [92, '92° Human Wide'],
+                      [100, '100° Ultra-Wide'],
                     ].map(([val, lbl]) => (
                       <button
                         key={val}
@@ -913,13 +964,16 @@ export function ViewerCanvas({
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700">W</kbd>
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700 ml-1">A</kbd>
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700 ml-1">S</kbd>
-                  <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700 ml-1">D</kbd> or D-Pad Move
+                  <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700 ml-1">D</kbd> Move
                 </span>
                 <span>
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700">SHIFT</kbd> Sprint
                 </span>
                 <span>
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700">MOUSE</kbd> Look (Click to lock)
+                </span>
+                <span className="text-emerald-400">
+                  👣 0.48m Real Stride (~25 steps / 12m)
                 </span>
                 <span>
                   <kbd className="px-1.5 py-0.5 rounded bg-stone-800 text-stone-200 border border-stone-700">ESC</kbd> Exit

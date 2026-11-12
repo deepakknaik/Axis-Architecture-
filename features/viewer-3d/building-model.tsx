@@ -16,6 +16,7 @@ import { RoomLabels3D } from './room-labels-3d';
 import { InteriorFixturesGroup } from './interior-fixtures-group';
 import { ExplodedGuideLines } from './exploded-guide-lines';
 import { MaterialCustomizationState } from '@/lib/reconstruction/material-types';
+import { InteriorCeilingMesh } from './interior-ceiling-mesh';
 
 export interface BuildingModelGroupProps {
   model: BuildingModel;
@@ -29,6 +30,7 @@ export interface BuildingModelGroupProps {
   fadeNonSelectedFloors?: boolean;
   isExplodedView?: boolean;
   materialCustomization?: MaterialCustomizationState;
+  isWalkthrough?: boolean;
 }
 
 export function BuildingModelGroup({
@@ -43,6 +45,7 @@ export function BuildingModelGroup({
   fadeNonSelectedFloors = true,
   isExplodedView = false,
   materialCustomization,
+  isWalkthrough = false,
 }: BuildingModelGroupProps) {
   return (
     <group
@@ -158,6 +161,14 @@ export function BuildingModelGroup({
                   wireframe={wireframe}
                 />
               ))}
+
+            {/* 8. Interior Ceilings with Ceiling Fans (Encloses room volume in Walkthrough mode) */}
+            {isWalkthrough && !isExplodedView && (
+              <InteriorCeilingMesh
+                floor={floor}
+                visible={isWalkthrough}
+              />
+            )}
           </group>
         );
       })}

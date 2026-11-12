@@ -151,6 +151,27 @@ export function WallMesh({
               />
             </mesh>
           )}
+
+          {/* 10cm Dark Polished Granite Skirting Baseboard (Matching Real Domestic Architecture) */}
+          {!wireframe && !seg.isHeader && !seg.isSill && (
+            <mesh
+              position={[
+                seg.position[0],
+                seg.position[1] - seg.height / 2 + 0.05,
+                seg.position[2],
+              ]}
+              rotation={[0, seg.rotationY, 0]}
+              castShadow
+              receiveShadow
+            >
+              <boxGeometry args={[seg.length + 0.005, 0.10, seg.thickness + 0.016]} />
+              <meshStandardMaterial
+                color="#282B30"
+                roughness={0.22}
+                metalness={0.35}
+              />
+            </mesh>
+          )}
         </group>
       ))}
     </group>
