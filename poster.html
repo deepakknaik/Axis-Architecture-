@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Axis Architecture - Project Exhibition Poster 2026</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap');
+
+    :root {
+      --bg: #0C0E12;
+      --card-bg: #15181E;
+      --border: #262B34;
+      --accent: #D47343;
+      --accent-glow: rgba(212, 115, 67, 0.25);
+      --text: #F1F3F5;
+      --text-muted: #9AA2B0;
+      --emerald: #10B981;
+      --blue: #3B82F6;
+      --purple: #8B5CF6;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 24px;
+      line-height: 1.45;
+    }
+
+    /* Print toolbar (hidden when printing) */
+    .toolbar {
+      max-width: 1400px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #1B1F27;
+      padding: 14px 24px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .btn {
+      background: var(--emerald);
+      color: #fff;
+      font-weight: 700;
+      font-size: 13px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-1px);
+    }
+
+    .btn-blue {
+      background: var(--blue);
+    }
+
+    /* Poster Container - 16:9 Landscape A1/A2 Proportion */
+    .poster-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: #111419;
+      border: 2px solid var(--border);
+      border-radius: 20px;
+      box-shadow: 0 25px 60px rgba(0,0,0,0.6);
+      overflow: hidden;
+    }
+
+    /* Header */
+    .poster-header {
+      background: linear-gradient(135deg, #090B0E 0%, #171B23 50%, #090B0E 100%);
+      padding: 28px 36px;
+      border-bottom: 2px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .dept-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .poster-title {
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .poster-subtitle {
+      font-size: 15px;
+      font-weight: 500;
+      color: #C5CBD5;
+    }
+
+    .meta-card {
+      background: #090B0E;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      text-align: right;
+    }
+
+    .meta-card div {
+      margin-bottom: 3px;
+      color: var(--text-muted);
+    }
+
+    .meta-card b {
+      color: #fff;
+    }
+
+    /* 3 Column Poster Grid */
+    .poster-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 20px;
+      padding: 24px 32px;
+    }
+
+    .col {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+    }
+
+    .panel-header {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-header.orange { color: var(--accent); }
+    .panel-header.emerald { color: var(--emerald); }
+    .panel-header.blue { color: var(--blue); }
+    .panel-header.purple { color: var(--purple); }
+
+    .panel h3 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: #fff;
+    }
+
+    .panel p {
+      font-size: 12px;
+      color: #C5CBD5;
+      line-height: 1.5;
+    }
+
+    .highlight-box {
+      margin-top: 10px;
+      background: #0B0D11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 11px;
+      color: #A0AAB8;
+    }
+
+    .bullet-list {
+      list-style: none;
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      font-size: 12px;
+      color: #C5CBD5;
+    }
+
+    .bullet-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .bullet-list li span.dot {
+      color: var(--emerald);
+      font-weight: bold;
+    }
+
+    /* Pipeline Diagram */
+    .flow-step {
+      background: #0B0D11;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .flow-arrow {
+      text-align: center;
+      color: #64748B;
+      font-size: 11px;
+      margin-bottom: 6px;
+    }
+
+    /* Stat Cards Grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stat-card {
+      background: #0B0D11;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-card .label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+    }
+
+    .stat-card .val {
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--emerald);
+      margin: 2px 0;
+    }
+
+    .stat-card .val.blue { color: var(--blue); }
+    .stat-card .val.orange { color: var(--accent); }
+
+    .stat-card .desc {
+      font-size: 10px;
+      color: #64748B;
+    }
+
+    /* Comparison Table */
+    table.comp-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      margin-top: 8px;
+    }
+
+    table.comp-table th {
+      text-align: left;
+      padding: 6px 8px;
+      border-bottom: 1px solid #334155;
+      color: var(--text-muted);
+    }
+
+    table.comp-table td {
+      padding: 8px 8px;
+      border-bottom: 1px solid #1E293B;
+      color: #E2E8F0;
+    }
+
+    table.comp-table td.highlight {
+      color: var(--emerald);
+      font-weight: bold;
+    }
+
+    /* Badges */
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 8px;
+    }
+
+    .tag {
+      background: #0B0D11;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: #CBD5E1;
+    }
+
+    /* Footer */
+    .poster-footer {
+      background: #090B0E;
+      padding: 14px 36px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* =========================================================================
+       PRINT OPTIMIZATIONS (A1 / A2 / A3 White Board)
+    ========================================================================= */
+    @media print {
+      body {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 0 !important;
+      }
+      .toolbar { display: none !important; }
+      .poster-container {
+        border: none !important;
+        box-shadow: none !important;
+        background: #fff !important;
+        max-width: 100% !important;
+        border-radius: 0 !important;
+      }
+      .poster-header {
+        background: #fff !important;
+        border-bottom: 2px solid #000 !important;
+        color: #000 !important;
+      }
+      .poster-title { color: #000 !important; }
+      .poster-subtitle { color: #333 !important; }
+      .meta-card {
+        background: #f1f5f9 !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+      .meta-card div { color: #475569 !important; }
+      .meta-card b { color: #000 !important; }
+      .poster-grid { background: #fff !important; }
+      .panel {
+        background: #f8fafc !important;
+        border: 1px solid #cbd5e1 !important;
+        box-shadow: none !important;
+        color: #000 !important;
+      }
+      .panel h3 { color: #000 !important; }
+      .panel p { color: #1e293b !important; }
+      .highlight-box {
+        background: #fff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #1e293b !important;
+      }
+      .bullet-list { color: #1e293b !important; }
+      .flow-step, .stat-card, .tag {
+        background: #fff !important;
+        border: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+      .stat-card .val { color: #047857 !important; }
+      .stat-card .val.blue { color: #1d4ed8 !important; }
+      table.comp-table th { color: #000 !important; border-bottom: 1px solid #94a3b8 !important; }
+      table.comp-table td { color: #1e293b !important; border-bottom: 1px solid #e2e8f0 !important; }
+      table.comp-table td.highlight { color: #047857 !important; }
+      .poster-footer {
+        background: #fff !important;
+        border-top: 1px solid #cbd5e1 !important;
+        color: #000 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Non-Printing Top Actions -->
+  <div class="toolbar">
+    <div>
+      <b style="color: #fff; font-size: 15px;">Project Exhibition 2026 — Second Review Official Poster Board</b>
+      <div style="font-size: 12px; color: var(--text-muted);">Print-ready A1 / A2 / A3 / 16:9 Landscape Layout</div>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <a href="http://localhost:3000/projects/proj_residence_01/workspace" class="btn btn-blue" target="_blank">
+        ⚡ Launch 3D Live Exhibition Demo
+      </a>
+      <button onclick="window.print()" class="btn">
+        🖨️ Print Poster / Save as PDF (Ctrl + P)
+      </button>
+    </div>
+  </div>
+
+  <!-- THE POSTER BOARD -->
+  <div class="poster-container">
+    
+    <!-- HEADER -->
+    <div class="poster-header">
+      <div>
+        <div class="dept-badge">
+          <span>DEPARTMENT OF COMPUTER SCIENCE & ENGINEERING</span>
+          <span>•</span>
+          <span>PROJECT EXHIBITION 2026 (REVIEW II)</span>
+        </div>
+        <h1 class="poster-title">AXIS ARCHITECTURE</h1>
+        <div class="poster-subtitle">
+          Autonomous 2D-to-3D BIM Reconstruction & Immersive Spatial Perception Engine
+        </div>
+      </div>
+
+      <div class="meta-card">
+        <div>PROJECT ID: <b>AXIS-2026-BIM</b></div>
+        <div>TEAM: <b>Project Team 01</b></div>
+        <div>EXHIBITION DATE: <b style="color: var(--accent);">13th November 2026</b></div>
+      </div>
+    </div>
+
+    <!-- 3-COLUMN CONTENT -->
+    <div class="poster-grid">
+      
+      <!-- COLUMN 1: CONTEXT & ARCHITECTURE -->
+      <div class="col">
+        
+        <!-- Abstract & Problem Statement -->
+        <div class="panel">
+          <div class="panel-header orange">1. Abstract & Problem Statement</div>
+          <p>
+            Manual 3D BIM modelling from 2D architectural drawings is time-consuming, expensive, and error-prone, requiring 10–14 hours of specialised CAD labour per residential floor. Furthermore, conventional 3D software fails to convey <b>real human domestic spatial scale</b>, leaving clients and architects disoriented inside virtual models.
+          </p>
+          <div class="highlight-box">
+            <b>The Solution:</b> Axis Architecture provides an autonomous, end-to-end computer vision pipeline that transforms raster blueprints into parametric 3D models in <b>1.8 seconds</b>, with biometrically calibrated human walking perception (12m room = 25 steps).
+          </div>
+        </div>
+
+        <!-- Objectives -->
+        <div class="panel">
+          <div class="panel-header emerald">2. Key Objectives</div>
+          <ul class="bullet-list">
+            <li>
+              <span class="dot">•</span>
+              <span><b>Autonomous CV Parsing:</b> Segment walls, doors, and windows from blueprint images with &gt; 94% precision.</span>
+            </li>
+            <li>
+              <span class="dot">•</span>
+              <span><b>Parametric BIM Graph:</b> Reconstruct topological polygons, wall subsegments, and room centroids in real time.</span>
+            </li>
+            <li>
+              <span class="dot">•</span>
+              <span><b>True Spatial Cadence:</b> Calibrate walk speed (1.18 m/s) and stride (0.48 m) so virtual rooms match real-world step counts.</span>
+            </li>
+            <li>
+              <span class="dot">•</span>
+              <span><b>Interactive Design & Sun Study:</b> Real-time solar day/night azimuth tracking and interactive PBR material swatches.</span>
+            </li>
+          </ul>
+        </div>
+
+        <!-- End-to-End Pipeline -->
+        <div class="panel">
+          <div class="panel-header purple">3. End-to-End System Pipeline</div>
+          <div class="flow-step">
+            <span>1. 2D Blueprint Image (PNG/JPG)</span>
+            <span style="color: #64748B;">Raster</span>
+          </div>
+          <div class="flow-arrow">↓ OpenCV CV Service (Port 8000)</div>
+          <div class="flow-step">
+            <span>2. Morphological Kernel & Hough Transform</span>
+            <span style="color: var(--blue);">Segmentation</span>
+          </div>
+          <div class="flow-arrow">↓ Vector Graph & Coordinate Transform</div>
+          <div class="flow-step">
+            <span>3. BuildingModel JSON Data Structure</span>
+            <span style="color: var(--emerald);">BIM Graph</span>
+          </div>
+          <div class="flow-arrow">↓ React Three Fiber / Three.js Engine</div>
+          <div class="flow-step" style="border-color: var(--accent); background: rgba(212,115,67,0.15); font-weight: bold;">
+            <span>4. 60 FPS Immersive 3D Walkthrough</span>
+            <span>WebGL</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- COLUMN 2: METHODOLOGY & INNOVATIONS -->
+      <div class="col">
+        
+        <!-- Spatial Scale & Human Cadence -->
+        <div class="panel">
+          <div class="panel-header emerald">4. Spatial Scale & Human Cadence</div>
+
+          <!-- Hero Split Render Image -->
+          <div style="position: relative; width: 100%; height: 180px; margin-bottom: 12px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border);">
+            <img src="images/hero_poster.jpg" alt="Axis Architecture 2D to 3D Split Render" style="width: 100%; height: 100%; object-fit: cover;">
+            <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(12,14,18,0.92)); padding: 6px 10px; font-family: 'JetBrains Mono', monospace; font-size: 10px; display: flex; justify-content: space-between;">
+              <span style="color: #CBD5E1;">2D CAD Vector Blueprint ➔ 3D Photorealistic Interior</span>
+              <span style="color: var(--emerald); font-weight: bold;">12m = 25 Steps</span>
+            </div>
+          </div>
+
+          <h3>Biometric Human Stride & Wide-Angle Vision</h3>
+          <p>
+            Standard 3D viewers use unrealistic sprint speeds (3.6 m/s) and narrow FOVs (70°), making rooms look like congested boxes traversed in 5 keystrokes. Axis Architecture introduces:
+          </p>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="label">WALKING PACE</div>
+              <div class="val">1.18 m/s</div>
+              <div class="desc">Natural domestic cadence</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">STRIDE LENGTH</div>
+              <div class="val">0.48 m</div>
+              <div class="desc">12m room = 25 steps</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">CAMERA LENS</div>
+              <div class="val blue">92° Wide</div>
+              <div class="desc">Human binocular eye</div>
+            </div>
+            <div class="stat-card">
+              <div class="label">HEAD BOBBING</div>
+              <div class="val blue">±0.022 m</div>
+              <div class="desc">Sinusoidal footfall sway</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Solar Sun Study -->
+        <div class="panel">
+          <div class="panel-header orange">5. Solar Study & Day/Night Lighting</div>
+          <h3>Dynamic Solar Azimuth & Elevation Tracking</h3>
+          <p>
+            Computes solar position between 06:00 AM and 10:00 PM, adjusting directional sunlight angle, sky color, warm soffit spotlights, and window grill shadow projections in real time. Enables passive solar heating analysis.
+          </p>
+          <div class="highlight-box" style="display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace;">
+            <span>Sunrise (06:30)</span>
+            <span>•</span>
+            <span>Noon (12:00)</span>
+            <span>•</span>
+            <span>Golden Hour (17:30)</span>
+          </div>
+        </div>
+
+        <!-- Material Customizer & Interactive Door Swings -->
+        <div class="panel">
+          <div class="panel-header purple">6. PBR Material Palettes & Door Swings</div>
+          <h3>Tactile Interior Customization</h3>
+          <p>
+            Instant 1-click material swaps (Italian Calacatta marble, Nordic Oak wood, Quartz Terrazzo, Clay tiles). Features interactive <b>animated door swings (0° ↔ 92°)</b> with CAD floor swing arcs on click.
+          </p>
+        </div>
+
+      </div>
+
+      <!-- COLUMN 3: RESULTS, BENCHMARKS & TECH STACK -->
+      <div class="col">
+        
+        <!-- Comparison Table -->
+        <div class="panel">
+          <div class="panel-header blue">7. Performance Comparison</div>
+          <table class="comp-table">
+            <thead>
+              <tr>
+                <th>Metric</th>
+                <th>Revit / SketchUp</th>
+                <th style="color: var(--emerald);">Axis Architecture</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>2D→3D Time</b></td>
+                <td>4 – 8 Hours</td>
+                <td class="highlight">1.8 Seconds</td>
+              </tr>
+              <tr>
+                <td><b>Human Cadence</b></td>
+                <td>Flying / None</td>
+                <td class="highlight">25 steps / 12m</td>
+              </tr>
+              <tr>
+                <td><b>Solar Simulation</b></td>
+                <td>Pre-baked / Slow</td>
+                <td class="highlight">Live 24h Slider</td>
+              </tr>
+              <tr>
+                <td><b>Hardware Req.</b></td>
+                <td>Heavy Workstation</td>
+                <td class="highlight">Any Web Browser</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Quantitative Metrics -->
+        <div class="panel">
+          <div class="panel-header emerald">8. Evaluated System Metrics</div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 6px; text-align: center;">
+            <div class="stat-card">
+              <div class="val" style="font-size: 20px;">94.2%</div>
+              <div class="label" style="font-size: 9px;">Wall Precision</div>
+            </div>
+            <div class="stat-card">
+              <div class="val blue" style="font-size: 20px;">1.8s</div>
+              <div class="label" style="font-size: 9px;">CV Latency</div>
+            </div>
+            <div class="stat-card">
+              <div class="val orange" style="font-size: 20px;">60 FPS</div>
+              <div class="label" style="font-size: 9px;">WebGL Walk</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tech Stack -->
+        <div class="panel">
+          <div class="panel-header purple">9. Technologies Used</div>
+          <div class="tag-cloud">
+            <span class="tag">Next.js 14 (App Router)</span>
+            <span class="tag">Three.js / React Three Fiber</span>
+            <span class="tag">Python FastAPI Microservice</span>
+            <span class="tag">OpenCV (CV Blueprint Parser)</span>
+            <span class="tag">TailwindCSS / Framer Motion</span>
+            <span class="tag">BIM Topology Vector Graph</span>
+          </div>
+        </div>
+
+        <!-- Conclusion -->
+        <div class="highlight-box" style="border-color: rgba(212, 115, 67, 0.4); background: rgba(212, 115, 67, 0.08); font-size: 11px;">
+          <b>Conclusion:</b> Axis Architecture bridges 2D architectural drafting and spatial immersion. By combining autonomous CV feature extraction with biometrically calibrated human walking, it offers architects and clients instant, intuitive, and accurate architectural understanding.
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="poster-footer">
+      <div>Axis Architecture — Department of CSE • Project Exhibition 2026</div>
+      <div style="color: var(--emerald); font-weight: 700;">Live Demonstration Ready: http://localhost:3000</div>
+    </div>
+
+  </div>
+
+</body>
+</html>

@@ -183,6 +183,21 @@ export default function ProjectPosterPage() {
                 <Footprints className="w-4 h-4" />
                 <span>4. Spatial Scale & Human Cadence</span>
               </div>
+              
+              {/* Photorealistic Architectural Split Hero Render */}
+              <div className="relative w-full h-44 mb-3 rounded-lg overflow-hidden border border-stone-800 shadow-inner group">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/images/hero_poster.jpg"
+                  alt="Axis Architecture: 2D Blueprint to Photorealistic 3D Spatial Scale Reconstruction"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+                <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-stone-950/90 via-stone-950/40 to-transparent p-2 text-[10px] font-mono text-stone-300 flex justify-between items-center">
+                  <span>2D CAD Blueprint ➔ 3D Photorealistic Interior</span>
+                  <span className="text-emerald-400 font-bold">12m = 25 Steps</span>
+                </div>
+              </div>
+
               <h3 className="text-sm font-bold text-white print:text-black mb-1.5">
                 Biometric Human Stride & Wide-Angle Vision
               </h3>
