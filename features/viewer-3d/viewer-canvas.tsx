@@ -39,6 +39,7 @@ import {
   CheckCircle2,
   Palette,
   Sun,
+  FileText,
 } from 'lucide-react';
 import { BuildingModel, Room3D, BuildingFloor, Point3D } from '@/lib/reconstruction/types';
 import {
@@ -686,6 +687,18 @@ export function ViewerCanvas({
                   {exportSuccess ? 'Exported!' : isExporting ? 'Exporting...' : 'Export .GLB'}
                 </span>
               </button>
+
+              {/* 1-Click Project Exhibition Poster (Review II) */}
+              <a
+                href="/poster"
+                target="_blank"
+                rel="noreferrer"
+                title="View & Print Official Project Exhibition Poster (Review II)"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-mono font-medium transition-all shadow ml-1 border bg-purple-950/80 hover:bg-purple-900 border-purple-600/50 text-purple-200"
+              >
+                <FileText className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">Poster</span>
+              </a>
             </div>
           </motion.div>
         )}
